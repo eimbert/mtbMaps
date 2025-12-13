@@ -13,9 +13,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -27,16 +29,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    private static final List<String> AUTH_WHITELIST = List.of(
+        "/api/auth/login",
+        "/api/auth/register"
+    );
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
     	
-    	if (request.getServletPath().contains("/api/auth")) {
-    	    filterChain.doFilter(request, response);
-    	    return;
-    	}
+        if (shouldSkipAuthentication(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
 
         final String authHeader = request.getHeader("Authorization");
@@ -67,6 +76,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean shouldSkipAuthentication(HttpServletRequest request) {
+        String servletPath = request.getServletPath();
+        return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, servletPath));
     }
 }
 
