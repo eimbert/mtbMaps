@@ -78,7 +78,8 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            return ResponseEntity.badRequest().body("El email ya está registrado");
+            return ResponseEntity.badRequest()
+                    .body(new AuthResponse("El email ya está registrado", -2));
         }
 
         AppUser user = new AppUser();
