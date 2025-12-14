@@ -93,7 +93,7 @@ public class AuthenticationController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok("Usuario registrado correctamente");
+        return ResponseEntity.ok(new AuthResponse("Usuario registrado correctamente", 0));
     }
 
     @PostMapping("/signup")
