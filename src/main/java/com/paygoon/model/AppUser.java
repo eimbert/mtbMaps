@@ -29,6 +29,10 @@ public class AppUser {
 
     private String passwordHash;
 
+    private String nickname;
+
+    private String rol;
+
     @Enumerated(EnumType.STRING)
     private LoginType loginType = LoginType.EMAIL;
 
