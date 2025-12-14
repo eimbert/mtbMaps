@@ -91,10 +91,23 @@ public class AuthenticationController {
         user.setRol(request.rol());
         user.setVerified(false);   // puedes activarlo después con verificación por correo
         user.setPremium(false);
+        user.setLoginType(LoginType.EMAIL);
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(new AuthResponse("Usuario registrado correctamente", 0));
+        try {
+            VerificationToken token = emailVerificationService.createAndSendToken(user);
+            return ResponseEntity.ok(new VerificationResponse(
+                    "Usuario registrado correctamente, verifica tu correo",
+                    token.getExpiresAt()
+            ));
+        } catch (Exception ex) {
+            if (ex instanceof ResponseStatusException rse) {
+                return ResponseEntity.status(rse.getStatusCode()).body(rse.getReason());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("No se pudo enviar el correo de verificación");
+        }
     }
 
     @PostMapping("/signup")
