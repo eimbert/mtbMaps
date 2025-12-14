@@ -5,6 +5,8 @@ public record LoginResponse(
     Long id,
     String name,
     String email,
+    String nickname,
+    String rol,
     boolean premium,
     boolean verified
 ) {}
