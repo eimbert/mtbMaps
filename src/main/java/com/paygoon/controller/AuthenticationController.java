@@ -49,6 +49,7 @@ public class AuthenticationController {
                 String token = jwtUtil.generateToken(user);
 
                 LoginResponse response = new LoginResponse(
+                    0,
                     token,
                     user.getId(),
                     user.getName(),
@@ -62,7 +63,7 @@ public class AuthenticationController {
 
         } catch (BadCredentialsException | UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponse("Usuario o contraseña erróneos"));
+                    .body(new AuthResponse("Usuario o contraseña erróneos", -1));
         }
     }
 
