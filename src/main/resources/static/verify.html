@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificar correo - PayGoon</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0 auto; max-width: 640px; padding: 24px; background: #f7f7f7; }
+        h1 { color: #0b4f6c; }
+        .card { background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .status { margin-top: 16px; padding: 12px; border-radius: 6px; }
+        .success { background: #e9f7ef; color: #2f7d4f; }
+        .error { background: #fbeaea; color: #9a1e1e; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Verificación de correo</h1>
+    <p id="message">Procesando token...</p>
+</div>
+
+<script>
+    async function verifyToken(token) {
+        const response = await fetch(`/api/auth/verify?token=${encodeURIComponent(token)}`);
+        const text = await response.text();
+        const message = document.getElementById('message');
+
+        if (response.ok) {
+            message.textContent = '¡Correo verificado! Ya puedes iniciar sesión.';
+            message.className = 'status success';
+            return;
+        }
+
+        let details = text;
+        if (response.status === 400) {
+            details = 'El token es inválido.';
+        } else if (response.status === 410) {
+            details = 'El token ha expirado. Solicita un nuevo correo de verificación desde la pantalla de registro.';
+        } else if (response.status === 409) {
+            details = 'El token ya fue usado o revocado.';
+        }
+        message.textContent = details;
+        message.className = 'status error';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+        verifyToken(token);
+    } else {
+        const message = document.getElementById('message');
+        message.textContent = 'No se recibió token para verificar.';
+        message.className = 'status error';
+    }
+</script>
+</body>
+</html>
