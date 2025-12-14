@@ -1,5 +1,6 @@
 package com.paygoon.dto;
 
 public record AuthResponse(
-                String message
-                ) {}
+        String message,
+        int exitCode
+) {}
