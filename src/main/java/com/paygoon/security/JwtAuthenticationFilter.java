@@ -41,24 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-    	
-        if (shouldSkipAuthentication(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String username;
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        jwt = authHeader.substring(7);
-        username = jwtUtil.extractUsername(jwt);
+        final String jwt = authHeader.substring(7);
+        final String username = jwtUtil.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
@@ -78,9 +64,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean shouldSkipAuthentication(HttpServletRequest request) {
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String servletPath = request.getServletPath();
-        return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, servletPath));
+
+        if (AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, servletPath))) {
+            return true;
+        }
+
+        String authHeader = request.getHeader("Authorization");
+        return authHeader == null || !authHeader.startsWith("Bearer ");
     }
 }
 
