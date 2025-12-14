@@ -78,12 +78,30 @@ public class AuthenticationController {
     
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequest request) {
-        if (userRepository.findByEmail(request.email()).isPresent()) {
-            return ResponseEntity.badRequest()
-                    .body(new AuthResponse("El email ya está registrado", -2));
+        AppUser user = userRepository.findByEmail(request.email()).orElse(null);
+
+        if (user != null) {
+            if (user.isVerified()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(new AuthResponse("El email ya está registrado", -2));
+            }
+
+            try {
+                VerificationToken token = emailVerificationService.createAndSendToken(user);
+                return ResponseEntity.ok(new VerificationResponse(
+                        "Correo reenviado para verificar tu cuenta",
+                        token.getExpiresAt()
+                ));
+            } catch (Exception ex) {
+                if (ex instanceof ResponseStatusException rse) {
+                    return ResponseEntity.status(rse.getStatusCode()).body(rse.getReason());
+                }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("No se pudo enviar el correo de verificación");
+            }
         }
 
-        AppUser user = new AppUser();
+        user = new AppUser();
         user.setEmail(request.email());
         user.setName(request.name());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
