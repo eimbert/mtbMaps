@@ -1,6 +1,6 @@
 package com.paygoon.controller;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,8 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.paygoon.dto.AuthRequest;
@@ -22,9 +23,14 @@ import com.paygoon.dto.AuthResponse;
 import com.paygoon.dto.LoginResponse;
 import com.paygoon.dto.UserProfileResponse;
 import com.paygoon.dto.UserRegisterRequest;
+import com.paygoon.dto.VerificationRequest;
+import com.paygoon.dto.VerificationResponse;
 import com.paygoon.model.AppUser;
+import com.paygoon.model.AppUser.LoginType;
+import com.paygoon.model.VerificationToken;
 import com.paygoon.repository.UserRepository;
 import com.paygoon.security.JwtUtil;
+import com.paygoon.service.EmailVerificationService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,6 +40,7 @@ public class AuthenticationController {
     @Autowired private JwtUtil jwtUtil;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private EmailVerificationService emailVerificationService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -86,6 +93,62 @@ public class AuthenticationController {
         userRepository.save(user);
 
         return ResponseEntity.ok("Usuario registrado correctamente");
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@Valid @RequestBody UserRegisterRequest request) {
+        AppUser user = userRepository.findByEmail(request.email())
+                .orElseGet(AppUser::new);
+
+        if (user.getId() != null && user.isVerified()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new AuthResponse("El email ya está verificado", -1));
+        }
+
+        user.setEmail(request.email());
+        user.setName(request.name());
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setNickname(request.nickname());
+        user.setRol(request.rol());
+        user.setVerified(false);
+        user.setPremium(false);
+        user.setLoginType(LoginType.EMAIL);
+
+        userRepository.save(user);
+
+        try {
+            VerificationToken token = emailVerificationService.createAndSendToken(user);
+            return ResponseEntity.ok(new VerificationResponse("Correo enviado", token.getExpiresAt()));
+        } catch (Exception ex) {
+            if (ex instanceof org.springframework.web.server.ResponseStatusException rse) {
+                return ResponseEntity.status(rse.getStatusCode()).body(rse.getReason());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("No se pudo enviar el correo de verificación");
+        }
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verify(@RequestParam("token") String token) {
+        return handleVerification(token);
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyPost(@Valid @RequestBody VerificationRequest request) {
+        return handleVerification(request.token());
+    }
+
+    private ResponseEntity<?> handleVerification(String token) {
+        try {
+            emailVerificationService.verifyToken(token);
+            return ResponseEntity.ok(new AuthResponse("Correo verificado", 0));
+        } catch (Exception ex) {
+            if (ex instanceof org.springframework.web.server.ResponseStatusException rse) {
+                return ResponseEntity.status(rse.getStatusCode()).body(rse.getReason());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("No se pudo verificar el token");
+        }
     }
 
     @GetMapping("/me")

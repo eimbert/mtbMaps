@@ -31,7 +31,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> AUTH_WHITELIST = List.of(
         "/api/auth/login",
-        "/api/auth/register"
+        "/api/auth/register",
+        "/api/auth/signup",
+        "/api/auth/verify"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -43,6 +45,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String jwt = authHeader.substring(7);
         final String username = jwtUtil.extractUsername(jwt);
 
