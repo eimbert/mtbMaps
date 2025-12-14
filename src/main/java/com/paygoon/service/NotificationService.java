@@ -21,13 +21,25 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final String fromEmail;
     private final String verificationBaseUrl;
+    private final String mailHost;
+    private final String mailPort;
+    private final String mailUsername;
+    private final String mailPassword;
 
     public NotificationService(JavaMailSender mailSender,
                                @Value("${app.mail.from:no-reply@paygoon.com}") String fromEmail,
-                               @Value("${app.verification.base-url:http://localhost:8080}") String verificationBaseUrl) {
+                               @Value("${app.verification.base-url:http://localhost:8080}") String verificationBaseUrl,
+                               @Value("${spring.mail.host:unknown}") String mailHost,
+                               @Value("${spring.mail.port:unknown}") String mailPort,
+                               @Value("${spring.mail.username:}") String mailUsername,
+                               @Value("${spring.mail.password:}") String mailPassword) {
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
         this.verificationBaseUrl = verificationBaseUrl;
+        this.mailHost = mailHost;
+        this.mailPort = mailPort;
+        this.mailUsername = mailUsername;
+        this.mailPassword = mailPassword;
     }
 
     public void sendVerificationEmail(AppUser user, String token, Duration expiration) {
@@ -36,6 +48,10 @@ public class NotificationService {
                 "Gracias por registrarte en PayGoon. Haz clic en el siguiente enlace para verificar tu correo:" +
                 "\n" + link + "\n\n" +
                 "El enlace vencerá en " + expiration.toHours() + " horas.";
+
+        String maskedPassword = (mailPassword == null || mailPassword.isBlank()) ? "(vacía)" : "****";
+        log.info("[EMAIL SMTP CONFIG] host={}, port={}, username={}, password={}",
+                mailHost, mailPort, mailUsername, maskedPassword);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
