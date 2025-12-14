@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.paygoon.dto.AuthRequest;
 import com.paygoon.dto.AuthResponse;
@@ -172,6 +173,35 @@ public class AuthenticationController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no proporcionado");
+        }
+
+        String token = authorizationHeader.substring(7);
+        String email = jwtUtil.extractUsername(token);
+
+        AppUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        if (user.isVerified()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new AuthResponse("El email ya está verificado", -1));
+        }
+
+        try {
+            VerificationToken verificationToken = emailVerificationService.createAndSendToken(user);
+            return ResponseEntity.ok(new VerificationResponse("Correo reenviado", verificationToken.getExpiresAt()));
+        } catch (Exception ex) {
+            if (ex instanceof ResponseStatusException rse) {
+                return ResponseEntity.status(rse.getStatusCode()).body(rse.getReason());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("No se pudo reenviar el correo de verificación");
+        }
     }
 
 }
