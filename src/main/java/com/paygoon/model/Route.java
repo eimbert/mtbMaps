@@ -26,6 +26,7 @@ public class Route {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     private String name;
@@ -45,7 +46,7 @@ public class Route {
     private String logoMime;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private AppUser createdBy;
 
     @CreationTimestamp

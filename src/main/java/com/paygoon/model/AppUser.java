@@ -22,7 +22,9 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class AppUser {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     private String name;
