@@ -24,7 +24,7 @@ public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT")
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     private String name;
