@@ -46,7 +46,7 @@ public class Route {
     private String logoMime;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT")
+    @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private AppUser createdBy;
 
     @CreationTimestamp

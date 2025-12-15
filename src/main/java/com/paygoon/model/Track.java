@@ -71,7 +71,7 @@ public class Track {
     private LocalDateTime uploadedAt;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT")
+    @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private AppUser createdBy;
 
     @CreationTimestamp
