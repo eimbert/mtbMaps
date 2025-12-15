@@ -12,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -41,10 +40,7 @@ public class Track {
     private Route route;
 
     @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "route_id", referencedColumnName = "route_id", insertable = false, updatable = false, columnDefinition = "BIGINT UNSIGNED"),
-            @JoinColumn(name = "modality_id", referencedColumnName = "id", columnDefinition = "BIGINT UNSIGNED")
-    })
+    @JoinColumn(name = "modality_id", columnDefinition = "BIGINT UNSIGNED")
     private RouteModality modality;
 
     @Column(length = 120, nullable = false)
