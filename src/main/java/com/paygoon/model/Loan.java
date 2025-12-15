@@ -29,11 +29,11 @@ public class Loan {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "lender_id")
+    @JoinColumn(name = "lender_id", columnDefinition = "BIGINT UNSIGNED")
     private AppUser lender;
 
     @ManyToOne
-    @JoinColumn(name = "borrower_id")
+    @JoinColumn(name = "borrower_id", columnDefinition = "BIGINT UNSIGNED")
     private AppUser borrower;
 
     private BigDecimal amount;

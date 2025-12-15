@@ -20,7 +20,7 @@ public class VerificationToken {
     private String token;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", columnDefinition = "BIGINT UNSIGNED")
     private AppUser user;
 
     private LocalDateTime createdAt = LocalDateTime.now();
