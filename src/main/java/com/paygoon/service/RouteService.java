@@ -1,6 +1,7 @@
 package com.paygoon.service;
 
 import java.util.Base64;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,10 @@ import lombok.RequiredArgsConstructor;
 public class RouteService {
 
     private final RouteRepository routeRepository;
+
+    public List<Route> getAllRoutes() {
+        return routeRepository.findAll();
+    }
 
     @Transactional
     public Route createRoute(RouteCreateRequest request, AppUser creator) {
