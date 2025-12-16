@@ -39,7 +39,7 @@ public class Route {
     private Integer year;
 
     @Lob
-    @Column(name = "logo_blob")
+    @Column(name = "logo_blob", columnDefinition = "LONGBLOB")
     private byte[] logoBlob;
 
     @Column(name = "logo_mime")
