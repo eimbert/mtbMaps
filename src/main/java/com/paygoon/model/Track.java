@@ -24,7 +24,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "tracks", indexes = {
         @Index(name = "idx_tracks_route", columnList = "route_id"),
-        @Index(name = "idx_tracks_route_modality", columnList = "route_id, modality_id"),
         @Index(name = "idx_tracks_created_by", columnList = "created_by"),
         @Index(name = "idx_tracks_uploaded_at", columnList = "uploaded_at")
 })
@@ -38,10 +37,6 @@ public class Track {
     @ManyToOne(optional = false)
     @JoinColumn(name = "route_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private Route route;
-
-    @ManyToOne
-    @JoinColumn(name = "modality_id", columnDefinition = "BIGINT UNSIGNED")
-    private RouteModality modality;
 
     @Column(length = 120, nullable = false)
     private String nickname;
