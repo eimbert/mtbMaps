@@ -59,6 +59,9 @@ public class Track {
     @Column(name = "gpx_asset_url", length = 512)
     private String gpxAssetUrl;
 
+    @Column(name = "route_xml", columnDefinition = "LONGTEXT")
+    private String routeXml;
+
     @Column(name = "file_name", length = 255)
     private String fileName;
 
