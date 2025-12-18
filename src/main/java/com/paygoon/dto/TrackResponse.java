@@ -2,6 +2,7 @@ package com.paygoon.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public record TrackResponse(
         Long id,
@@ -10,6 +11,7 @@ public record TrackResponse(
         String category,
         String bikeType,
         Integer timeSeconds,
+        LocalTime duracionRecorrido,
         BigDecimal distanceKm,
         String fileName,
         LocalDateTime uploadedAt,

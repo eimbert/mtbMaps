@@ -2,6 +2,7 @@ package com.paygoon.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -49,6 +50,9 @@ public class Track {
 
     @Column(name = "time_seconds")
     private Integer timeSeconds;
+
+    @Column(name = "duracion_recorrido")
+    private LocalTime duracionRecorrido;
 
     @Column(name = "distance_km", precision = 6, scale = 2)
     private BigDecimal distanceKm;
