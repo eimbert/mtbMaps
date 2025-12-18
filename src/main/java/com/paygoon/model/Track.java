@@ -53,12 +53,6 @@ public class Track {
     @Column(name = "distance_km", precision = 6, scale = 2)
     private BigDecimal distanceKm;
 
-    @Column(name = "ascent_m")
-    private Integer ascentM;
-
-    @Column(name = "gpx_asset_url", length = 512)
-    private String gpxAssetUrl;
-
     @Column(name = "route_xml", columnDefinition = "LONGTEXT")
     private String routeXml;
 
