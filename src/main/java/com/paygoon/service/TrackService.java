@@ -43,6 +43,7 @@ public class TrackService {
         track.setCategory(request.category());
         track.setBikeType(request.bikeType());
         track.setTimeSeconds(request.timeSeconds());
+        track.setTiempoReal(request.tiempoReal());
         track.setDuracionRecorrido(request.duracionRecorrido());
         track.setDistanceKm(request.distanceKm());
         track.setRouteXml(request.routeXml());
@@ -68,6 +69,7 @@ public class TrackService {
                 track.getCategory(),
                 track.getBikeType(),
                 track.getTimeSeconds(),
+                track.getTiempoReal(),
                 track.getDuracionRecorrido(),
                 track.getDistanceKm(),
                 track.getFileName(),

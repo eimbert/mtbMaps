@@ -14,6 +14,7 @@ public record TrackUploadRequest(
         @Size(max = 60) String category,
         @Size(max = 30) String bikeType,
         @PositiveOrZero Integer timeSeconds,
+        @PositiveOrZero Integer tiempoReal,
         LocalTime duracionRecorrido,
         @DecimalMin(value = "0.0", inclusive = true) BigDecimal distanceKm,
         String routeXml,

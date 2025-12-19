@@ -51,6 +51,9 @@ public class Track {
     @Column(name = "time_seconds")
     private Integer timeSeconds;
 
+    @Column(name = "tiempo_real")
+    private Integer tiempoReal;
+
     @Column(name = "duracion_recorrido")
     private LocalTime duracionRecorrido;
 

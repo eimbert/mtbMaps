@@ -11,6 +11,7 @@ public record TrackResponse(
         String category,
         String bikeType,
         Integer timeSeconds,
+        Integer tiempoReal,
         LocalTime duracionRecorrido,
         BigDecimal distanceKm,
         String fileName,
