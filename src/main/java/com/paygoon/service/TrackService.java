@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.paygoon.dto.TrackRouteSummaryResponse;
 import com.paygoon.dto.TrackUploadRequest;
 import com.paygoon.dto.TrackResponse;
 import com.paygoon.dto.TrackGpxResponse;
@@ -30,6 +31,10 @@ public class TrackService {
         return trackRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public List<TrackRouteSummaryResponse> getTracksByRoute(Long routeId) {
+        return trackRepository.findRouteSummariesByRouteId(routeId);
     }
 
     @Transactional

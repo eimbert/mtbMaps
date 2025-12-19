@@ -1,5 +1,7 @@
 package com.paygoon.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.paygoon.dto.TrackGpxResponse;
+import com.paygoon.dto.TrackResponse;
+import com.paygoon.dto.TrackRouteSummaryResponse;
 import com.paygoon.dto.TrackUploadRequest;
 import com.paygoon.dto.TrackUploadResponse;
-import com.paygoon.dto.TrackResponse;
-import com.paygoon.dto.TrackGpxResponse;
 import com.paygoon.model.AppUser;
+import com.paygoon.model.Track;
 import com.paygoon.repository.UserRepository;
 import com.paygoon.service.TrackService;
 
@@ -36,6 +40,12 @@ public class TrackController {
     @GetMapping
     public ResponseEntity<Iterable<TrackResponse>> getAllTracks() {
         Iterable<TrackResponse> tracks = trackService.getAllTracks();
+        return ResponseEntity.ok(tracks);
+    }
+
+    @GetMapping("/route/{routeId}")
+    public ResponseEntity<List<TrackRouteSummaryResponse>> getTracksByRoute(@PathVariable Long routeId) {
+        List<TrackRouteSummaryResponse> tracks = trackService.getTracksByRoute(routeId);
         return ResponseEntity.ok(tracks);
     }
 
