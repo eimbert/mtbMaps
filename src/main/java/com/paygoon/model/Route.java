@@ -37,6 +37,9 @@ public class Route {
     private String autonomousCommunity;
 
     private Integer year;
+    
+    @Column(name = "master_xml", columnDefinition = "LONGTEXT")
+    private String gpxMaster;
 
     @Lob
     @Column(name = "logo_blob", columnDefinition = "LONGBLOB")

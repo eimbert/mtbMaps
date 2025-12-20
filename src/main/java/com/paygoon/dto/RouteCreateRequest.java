@@ -10,6 +10,6 @@ public record RouteCreateRequest(
         @Size(max = 120) String population,
         @Size(max = 120) String autonomousCommunity,
         @NotNull @Positive Integer year,
-        String logoBase64,
+        String logoBlob,
         @Size(max = 64) String logoMime
 ) {}

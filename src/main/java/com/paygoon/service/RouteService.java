@@ -33,8 +33,8 @@ public class RouteService {
         route.setLogoMime(request.logoMime());
         route.setCreatedBy(creator);
 
-        if (request.logoBase64() != null && !request.logoBase64().isBlank()) {
-            byte[] decodedLogo = Base64.getDecoder().decode(request.logoBase64());
+        if (request.logoBlob() != null && !request.logoBlob().isBlank()) {
+            byte[] decodedLogo = Base64.getDecoder().decode(request.logoBlob());
             route.setLogoBlob(decodedLogo);
         }
 
