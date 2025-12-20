@@ -33,6 +33,12 @@ public class TrackService {
                 .collect(Collectors.toList());
     }
 
+    public List<TrackResponse> getTracksByCreator(Long creatorId) {
+        return trackRepository.findByCreatedById(creatorId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public List<TrackRouteSummaryResponse> getTracksByRoute(Long routeId) {
         return trackRepository.findRouteSummariesByRouteId(routeId);
     }
