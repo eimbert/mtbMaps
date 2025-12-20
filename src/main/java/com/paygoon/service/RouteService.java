@@ -32,6 +32,7 @@ public class RouteService {
         route.setYear(request.year());
         route.setLogoMime(request.logoMime());
         route.setCreatedBy(creator);
+        route.setGpxMaster(request.gpxMaster());
 
         if (request.logoBlob() != null && !request.logoBlob().isBlank()) {
             byte[] decodedLogo = Base64.getDecoder().decode(request.logoBlob());
