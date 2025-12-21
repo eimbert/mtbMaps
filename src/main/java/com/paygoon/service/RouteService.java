@@ -33,6 +33,7 @@ public class RouteService {
         route.setLogoMime(request.logoMime());
         route.setCreatedBy(creator);
         route.setGpxMaster(request.gpxMaster());
+        route.setProvince(request.province());
 
         if (request.logoBlob() != null && !request.logoBlob().isBlank()) {
             byte[] decodedLogo = Base64.getDecoder().decode(request.logoBlob());

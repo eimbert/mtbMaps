@@ -12,5 +12,6 @@ public record RouteCreateRequest(
         @NotNull @Positive Integer year,
         String logoBlob,
         String gpxMaster,
+        String province,
         @Size(max = 64) String logoMime
 ) {}

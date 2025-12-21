@@ -47,6 +47,8 @@ public class Route {
 
     @Column(name = "logo_mime")
     private String logoMime;
+    
+    private String province;
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT UNSIGNED")
