@@ -81,6 +81,15 @@ public class TrackService {
         return new TrackGpxResponse(track.getId(), track.getFileName(), track.getRouteXml());
     }
 
+    @Transactional
+    public void deleteTrack(Long trackId) {
+        if (!trackRepository.existsById(trackId)) {
+            throw new EntityNotFoundException("Track not found: " + trackId);
+        }
+
+        trackRepository.deleteById(trackId);
+    }
+
     private TrackResponse mapToResponse(Track track) {
         return new TrackResponse(
                 track.getId(),
