@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,8 +36,10 @@ public class Track {
     @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "route_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+//    @ManyToOne(optional = false)
+//    @JoinColumn(name = "route_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "route_id", nullable = true, columnDefinition = "BIGINT UNSIGNED")
     private Route route;
 
     @Column(length = 120, nullable = false)
@@ -76,4 +79,6 @@ public class Track {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    
+    private String title;
 }

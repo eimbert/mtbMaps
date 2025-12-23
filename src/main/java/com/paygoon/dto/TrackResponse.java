@@ -16,5 +16,6 @@ public record TrackResponse(
         BigDecimal distanceKm,
         String fileName,
         LocalDateTime uploadedAt,
-        Long createdBy
+        Long createdBy,
+        String title
 ) {}

@@ -45,11 +45,19 @@ public class TrackService {
 
     @Transactional
     public Track createTrack(TrackUploadRequest request, AppUser creator) {
-        Route route = routeRepository.findById(request.routeId())
-                .orElseThrow(() -> new EntityNotFoundException("Route not found"));
+//        Route route = routeRepository.findById(request.routeId())
+//                .orElseThrow(() -> new EntityNotFoundException("Route not found"));
 
-        Track track = new Track();
-        track.setRoute(route);
+    	Track track = new Track();
+    	
+    	if (request.routeId() != null) {
+            Route route = routeRepository.findById(request.routeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Route not found: " + request.routeId()));
+            track.setRoute(route);
+        } else {
+            track.setRoute(null);
+        }
+    	        
         track.setNickname(resolveNickname(creator));
         track.setCategory(request.category());
         track.setBikeType(request.bikeType());
@@ -61,6 +69,7 @@ public class TrackService {
         track.setFileName(request.fileName());
         track.setUploadedAt(request.uploadedAt() != null ? request.uploadedAt() : LocalDateTime.now());
         track.setCreatedBy(creator);
+        track.setTitle(request.title());
 
         return trackRepository.save(track);
     }
@@ -85,7 +94,8 @@ public class TrackService {
                 track.getDistanceKm(),
                 track.getFileName(),
                 track.getUploadedAt(),
-                track.getCreatedBy() != null ? track.getCreatedBy().getId() : null
+                track.getCreatedBy() != null ? track.getCreatedBy().getId() : null,
+                track.getTitle()
         );
     }
 

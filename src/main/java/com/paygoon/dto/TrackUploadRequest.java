@@ -10,7 +10,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 public record TrackUploadRequest(
-        @NotNull Long routeId,
+        Long routeId,
         @Size(max = 60) String category,
         @Size(max = 30) String bikeType,
         @PositiveOrZero Integer timeSeconds,
@@ -19,5 +19,6 @@ public record TrackUploadRequest(
         @DecimalMin(value = "0.0", inclusive = true) BigDecimal distanceKm,
         String routeXml,
         @Size(max = 255) String fileName,
-        LocalDateTime uploadedAt
+        LocalDateTime uploadedAt,
+        String title
 ) {}
