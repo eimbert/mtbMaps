@@ -15,7 +15,7 @@ import java.util.UUID;
 @Service
 public class EmailVerificationService {
 
-    private static final Duration TOKEN_EXPIRATION = Duration.ofHours(24);
+    private static final Duration TOKEN_EXPIRATION = Duration.ofHours(2);
     private static final Duration RESEND_COOLDOWN = Duration.ofMinutes(1);
 
     private final VerificationTokenRepository tokenRepository;
