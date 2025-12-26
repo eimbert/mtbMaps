@@ -69,6 +69,18 @@ public class Track {
     @Column(name = "file_name", length = 255)
     private String fileName;
 
+    @Column(name = "anyo")
+    private Integer anyo;
+
+    @Column(name = "comunidad", length = 50)
+    private String comunidad;
+
+    @Column(name = "provincia", length = 50)
+    private String provincia;
+
+    @Column(name = "poblacion", length = 70)
+    private String poblacion;
+
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 

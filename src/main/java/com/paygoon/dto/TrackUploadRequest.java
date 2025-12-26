@@ -19,6 +19,10 @@ public record TrackUploadRequest(
         @DecimalMin(value = "0.0", inclusive = true) BigDecimal distanceKm,
         String routeXml,
         @Size(max = 255) String fileName,
+        Integer anyo,
+        @Size(max = 50) String comunidad,
+        @Size(max = 50) String provincia,
+        @Size(max = 70) String poblacion,
         LocalDateTime uploadedAt,
         String title
 ) {}

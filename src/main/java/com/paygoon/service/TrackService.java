@@ -67,6 +67,10 @@ public class TrackService {
         track.setDistanceKm(request.distanceKm());
         track.setRouteXml(request.routeXml());
         track.setFileName(request.fileName());
+        track.setAnyo(request.anyo());
+        track.setComunidad(request.comunidad());
+        track.setProvincia(request.provincia());
+        track.setPoblacion(request.poblacion());
         track.setUploadedAt(request.uploadedAt() != null ? request.uploadedAt() : LocalDateTime.now());
         track.setCreatedBy(creator);
         track.setTitle(request.title());
@@ -102,6 +106,10 @@ public class TrackService {
                 track.getDuracionRecorrido(),
                 track.getDistanceKm(),
                 track.getFileName(),
+                track.getAnyo(),
+                track.getComunidad(),
+                track.getProvincia(),
+                track.getPoblacion(),
                 track.getUploadedAt(),
                 track.getCreatedBy() != null ? track.getCreatedBy().getId() : null,
                 track.getTitle()

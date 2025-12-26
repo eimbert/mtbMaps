@@ -15,6 +15,10 @@ public record TrackResponse(
         LocalTime duracionRecorrido,
         BigDecimal distanceKm,
         String fileName,
+        Integer anyo,
+        String comunidad,
+        String provincia,
+        String poblacion,
         LocalDateTime uploadedAt,
         Long createdBy,
         String title
