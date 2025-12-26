@@ -1,5 +1,6 @@
 package com.paygoon.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -49,6 +50,9 @@ public class Route {
     private String logoMime;
     
     private String province;
+
+    @Column(name = "distance_km", precision = 6, scale = 2)
+    private BigDecimal distanceKm;
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT UNSIGNED")
