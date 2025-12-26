@@ -70,16 +70,17 @@ public class Track {
     private String fileName;
 
     @Column(name = "anyo")
-    private Integer anyo;
+    private Integer year;
 
     @Column(name = "comunidad", length = 50)
-    private String comunidad;
+    private String autonomousCommunity;
 
     @Column(name = "provincia", length = 50)
-    private String provincia;
+    private String province;
 
     @Column(name = "poblacion", length = 70)
-    private String poblacion;
+    private String population
+;
 
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;

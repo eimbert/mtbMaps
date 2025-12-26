@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.paygoon.dto.TrackRouteSummaryResponse;
 import com.paygoon.dto.TrackUploadRequest;
 import com.paygoon.dto.TrackResponse;
+import com.paygoon.controller.AuthenticationController;
 import com.paygoon.dto.TrackGpxResponse;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.Route;
@@ -24,8 +25,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TrackService {
 
+//    private final AuthenticationController authenticationController;
+
     private final TrackRepository trackRepository;
     private final RouteRepository routeRepository;
+
+//    TrackService(AuthenticationController authenticationController) {
+//        this.authenticationController = authenticationController;
+//		
+//    }
 
     public List<TrackResponse> getAllTracks() {
         return trackRepository.findAll().stream()
@@ -67,10 +75,10 @@ public class TrackService {
         track.setDistanceKm(request.distanceKm());
         track.setRouteXml(request.routeXml());
         track.setFileName(request.fileName());
-        track.setAnyo(request.anyo());
-        track.setComunidad(request.comunidad());
-        track.setProvincia(request.provincia());
-        track.setPoblacion(request.poblacion());
+        track.setYear(request.year());
+        track.setAutonomousCommunity(request.autonomousCommunity());
+        track.setProvince(request.province());
+        track.setPopulation(request.population());
         track.setUploadedAt(request.uploadedAt() != null ? request.uploadedAt() : LocalDateTime.now());
         track.setCreatedBy(creator);
         track.setTitle(request.title());
@@ -106,10 +114,10 @@ public class TrackService {
                 track.getDuracionRecorrido(),
                 track.getDistanceKm(),
                 track.getFileName(),
-                track.getAnyo(),
-                track.getComunidad(),
-                track.getProvincia(),
-                track.getPoblacion(),
+                track.getYear(),
+                track.getAutonomousCommunity(),
+                track.getProvince(),
+                track.getPopulation(),
                 track.getUploadedAt(),
                 track.getCreatedBy() != null ? track.getCreatedBy().getId() : null,
                 track.getTitle()
