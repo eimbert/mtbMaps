@@ -34,6 +34,7 @@ public class RouteService {
         route.setCreatedBy(creator);
         route.setGpxMaster(request.gpxMaster());
         route.setProvince(request.province());
+        route.setDistanceKm(request.distanceKm());
 
         if (request.logoBlob() != null && !request.logoBlob().isBlank()) {
             byte[] decodedLogo = Base64.getDecoder().decode(request.logoBlob());
