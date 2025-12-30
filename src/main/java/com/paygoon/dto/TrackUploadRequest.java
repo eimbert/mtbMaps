@@ -24,5 +24,6 @@ public record TrackUploadRequest(
         @Size(max = 50) String province,
         @Size(max = 70) String population,
         LocalDateTime uploadedAt,
-        String title
+        String title,
+        Boolean shared
 ) {}

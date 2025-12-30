@@ -21,5 +21,6 @@ public record TrackResponse(
         String population,
         LocalDateTime uploadedAt,
         Long createdBy,
-        String title
+        String title,
+        boolean shared
 ) {}
