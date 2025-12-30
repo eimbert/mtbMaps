@@ -94,4 +94,6 @@ public class Track {
     private LocalDateTime createdAt;
     
     private String title;
+    
+    private boolean shared = true;
 }

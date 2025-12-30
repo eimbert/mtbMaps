@@ -82,6 +82,7 @@ public class TrackService {
         track.setUploadedAt(request.uploadedAt() != null ? request.uploadedAt() : LocalDateTime.now());
         track.setCreatedBy(creator);
         track.setTitle(request.title());
+        track.setShared(request.shared());
 
         return trackRepository.save(track);
     }
