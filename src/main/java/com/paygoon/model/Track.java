@@ -95,7 +95,11 @@ public class Track {
 
     private String title;
 
-	@Column(nullable = false)
+        @Column(nullable = false)
     private boolean shared = true;
+
+    public boolean isShared() {
+        return shared;
+    }
 
 }
