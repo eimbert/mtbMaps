@@ -22,5 +22,5 @@ public record TrackResponse(
         LocalDateTime uploadedAt,
         Long createdBy,
         String title,
-        boolean shared
+        Boolean shared
 ) {}
