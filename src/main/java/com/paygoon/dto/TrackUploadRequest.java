@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
@@ -25,5 +24,6 @@ public record TrackUploadRequest(
         @Size(max = 70) String population,
         LocalDateTime uploadedAt,
         String title,
-        boolean shared
+        Boolean shared
+
 ) {}

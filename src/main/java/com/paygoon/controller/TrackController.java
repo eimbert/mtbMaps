@@ -57,6 +57,19 @@ public class TrackController {
         return ResponseEntity.ok(tracks);
     }
 
+    @GetMapping("/shared")
+    public ResponseEntity<List<TrackResponse>> getSharedTracks(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        AppUser requester = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        List<TrackResponse> tracks = trackService.getSharedTracksExcludingUser(requester.getId());
+        return ResponseEntity.ok(tracks);
+    }
+
     @GetMapping("/route/{routeId}")
     public ResponseEntity<List<TrackRouteSummaryResponse>> getTracksByRoute(@PathVariable Long routeId) {
         List<TrackRouteSummaryResponse> tracks = trackService.getTracksByRoute(routeId);

@@ -17,4 +17,6 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
     List<TrackRouteSummaryResponse> findRouteSummariesByRouteId(@Param("routeId") Long routeId);
 
     List<Track> findByCreatedById(Long createdById);
+
+    List<Track> findBySharedTrueAndCreatedByIdNot(Long createdById);
 }

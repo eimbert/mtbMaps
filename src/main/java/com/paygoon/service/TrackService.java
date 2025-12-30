@@ -51,6 +51,12 @@ public class TrackService {
         return trackRepository.findRouteSummariesByRouteId(routeId);
     }
 
+    public List<TrackResponse> getSharedTracksExcludingUser(Long userId) {
+        return trackRepository.findBySharedTrueAndCreatedByIdNot(userId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public Track createTrack(TrackUploadRequest request, AppUser creator) {
 //        Route route = routeRepository.findById(request.routeId())
@@ -82,7 +88,8 @@ public class TrackService {
         track.setUploadedAt(request.uploadedAt() != null ? request.uploadedAt() : LocalDateTime.now());
         track.setCreatedBy(creator);
         track.setTitle(request.title());
-        track.setShared(request.shared());
+        track.setShared(Boolean.TRUE.equals(request.shared()));
+
 
         return trackRepository.save(track);
     }
@@ -121,7 +128,8 @@ public class TrackService {
                 track.getPopulation(),
                 track.getUploadedAt(),
                 track.getCreatedBy() != null ? track.getCreatedBy().getId() : null,
-                track.getTitle()
+                track.getTitle(),
+                track.isShared()
         );
     }
 
