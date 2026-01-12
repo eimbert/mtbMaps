@@ -19,6 +19,7 @@ public record TrackResponse(
         String autonomousCommunity,
         String province,
         String population,
+        String startLocationUrl,
         LocalDateTime uploadedAt,
         Long createdBy,
         String title,
