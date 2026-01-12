@@ -63,6 +63,12 @@ public class Track {
     @Column(name = "distance_km", precision = 6, scale = 2)
     private BigDecimal distanceKm;
 
+    @Column(name = "start_lat", precision = 15, scale = 12)
+    private BigDecimal startLat;
+
+    @Column(name = "start_lon", precision = 15, scale = 12)
+    private BigDecimal startLon;
+
     @Column(name = "route_xml", columnDefinition = "LONGTEXT")
     private String routeXml;
 
