@@ -79,6 +79,8 @@ public class TrackService {
         track.setTiempoReal(request.tiempoReal());
         track.setDuracionRecorrido(request.duracionRecorrido());
         track.setDistanceKm(request.distanceKm());
+        track.setStartLat(request.startLat());
+        track.setStartLon(request.startLon());
         track.setRouteXml(request.routeXml());
         track.setFileName(request.fileName());
         track.setYear(request.year());
