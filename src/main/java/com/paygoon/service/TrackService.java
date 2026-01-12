@@ -3,6 +3,8 @@ package com.paygoon.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +81,8 @@ public class TrackService {
         track.setTiempoReal(request.tiempoReal());
         track.setDuracionRecorrido(request.duracionRecorrido());
         track.setDistanceKm(request.distanceKm());
+        track.setStartLat(request.startLat());
+        track.setStartLon(request.startLon());
         track.setRouteXml(request.routeXml());
         track.setFileName(request.fileName());
         track.setYear(request.year());
@@ -126,6 +130,7 @@ public class TrackService {
                 track.getAutonomousCommunity(),
                 track.getProvince(),
                 track.getPopulation(),
+                buildStartLocationUrl(track),
                 track.getUploadedAt(),
                 track.getCreatedBy() != null ? track.getCreatedBy().getId() : null,
                 track.getTitle(),
@@ -143,5 +148,22 @@ public class TrackService {
         }
 
         return creator.getEmail();
+    }
+
+    private String buildStartLocationUrl(Track track) {
+        if (track.getStartLat() != null && track.getStartLon() != null) {
+            return "https://www.google.com/maps/search/?api=1&query="
+                    + track.getStartLat().toPlainString()
+                    + ","
+                    + track.getStartLon().toPlainString();
+        }
+
+        String population = track.getPopulation();
+        if (population == null || population.isBlank()) {
+            return null;
+        }
+
+        return "https://www.google.com/maps/search/?api=1&query="
+                + URLEncoder.encode(population, StandardCharsets.UTF_8);
     }
 }
