@@ -16,6 +16,8 @@ public record TrackUploadRequest(
         @PositiveOrZero Integer tiempoReal,
         LocalTime duracionRecorrido,
         @DecimalMin(value = "0.0", inclusive = true) BigDecimal distanceKm,
+        BigDecimal startLat,
+        BigDecimal startLon,
         String routeXml,
         @Size(max = 255) String fileName,
         Integer year,
