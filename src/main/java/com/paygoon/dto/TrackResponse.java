@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import jakarta.persistence.Column;
+
 public record TrackResponse(
         Long id,
         Long routeId,
@@ -23,5 +25,7 @@ public record TrackResponse(
         LocalDateTime uploadedAt,
         Long createdBy,
         String title,
-        Boolean shared
+        Boolean shared,
+        BigDecimal startLat,
+        BigDecimal startLon
 ) {}

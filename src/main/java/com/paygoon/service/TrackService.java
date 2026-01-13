@@ -134,7 +134,9 @@ public class TrackService {
                 track.getUploadedAt(),
                 track.getCreatedBy() != null ? track.getCreatedBy().getId() : null,
                 track.getTitle(),
-                track.isShared()
+                track.isShared(),
+                track.getStartLat(),
+                track.getStartLon()
         );
     }
 
