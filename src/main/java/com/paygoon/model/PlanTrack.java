@@ -33,15 +33,15 @@ public class PlanTrack {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "BIGINT")
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "BIGINT")
     private PlanFolder folder;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "created_by_user_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "created_by_user_id", nullable = false, columnDefinition = "BIGINT")
     private AppUser createdBy;
 
     @Column(length = 160)

@@ -38,22 +38,22 @@ public class PlanInvitation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "BIGINT")
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "BIGINT")
     private PlanFolder folder;
 
     @ManyToOne
-    @JoinColumn(name = "invited_user_id", columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "invited_user_id", columnDefinition = "BIGINT")
     private AppUser invitedUser;
 
     @Column(name = "invited_email", length = 254)
     private String invitedEmail;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "invited_by_user_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "invited_by_user_id", nullable = false, columnDefinition = "BIGINT")
     private AppUser invitedBy;
 
     @Enumerated(EnumType.STRING)

@@ -31,11 +31,11 @@ public class PlanFolder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "BIGINT")
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "owner_user_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @JoinColumn(name = "owner_user_id", nullable = false, columnDefinition = "BIGINT")
     private AppUser owner;
 
     @Column(length = 120, nullable = false)
