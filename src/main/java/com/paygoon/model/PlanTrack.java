@@ -74,6 +74,9 @@ public class PlanTrack {
 
     @Column(name = "gpx_storage_path", length = 600)
     private String gpxStoragePath;
+    
+    @Column(name = "route_xml", columnDefinition = "LONGTEXT")
+    private String routeXml;
 
     @Column(name = "route_xml", columnDefinition = "LONGTEXT")
     private String routeXml;
