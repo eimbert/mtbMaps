@@ -17,11 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.paygoon.dto.PlanFolderCreateRequest;
 import com.paygoon.dto.PlanFolderCreateResponse;
 import com.paygoon.dto.PlanFolderListItemResponse;
+import com.paygoon.dto.PlanTrackImportRequest;
+import com.paygoon.dto.PlanTrackImportResponse;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.PlanFolder;
 import com.paygoon.model.PlanFolderMember;
+import com.paygoon.model.PlanTrack;
 import com.paygoon.repository.PlanFolderRepository;
 import com.paygoon.repository.PlanFolderMemberRepository;
+import com.paygoon.repository.PlanTrackRepository;
 import com.paygoon.repository.UserRepository;
 
 import jakarta.validation.Valid;
@@ -35,6 +39,7 @@ public class PlanFolderController {
 
     private final PlanFolderRepository planFolderRepository;
     private final PlanFolderMemberRepository planFolderMemberRepository;
+    private final PlanTrackRepository planTrackRepository;
     private final UserRepository userRepository;
 
     @GetMapping
@@ -114,6 +119,54 @@ public class PlanFolderController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderCreateResponse(null, "No se pudo crear la carpeta del plan", -99));
+        }
+    }
+
+    @PostMapping("/tracks/import")
+    public ResponseEntity<PlanTrackImportResponse> importPlanTrack(
+            @Valid @RequestBody PlanTrackImportRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackImportResponse(null, "No autenticado", -1));
+        }
+
+        AppUser requester = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        PlanFolder folder = planFolderRepository.findById(request.folderId())
+                .orElse(null);
+        if (folder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackImportResponse(null, "Carpeta no encontrada", -2));
+        }
+
+        try {
+            PlanTrack planTrack = new PlanTrack();
+            planTrack.setFolder(folder);
+            planTrack.setCreatedBy(requester);
+            planTrack.setName(request.name());
+            planTrack.setStartLat(request.startLat());
+            planTrack.setStartLon(request.startLon());
+            planTrack.setStartPopulation(request.startPopulation());
+            planTrack.setDistanceKm(request.distanceKm());
+            planTrack.setMovingTimeSec(request.movingTimeSec());
+            planTrack.setTotalTimeSec(request.totalTimeSec());
+            planTrack.setRouteXml(request.routeXml());
+            planTrack.setSourceType(PlanTrack.SourceType.import_gpx);
+
+            PlanTrack savedPlanTrack = planTrackRepository.save(planTrack);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new PlanTrackImportResponse(
+                            savedPlanTrack.getId(),
+                            "Track importado correctamente",
+                            0
+                    ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanTrackImportResponse(null, "No se pudo importar el track", -99));
         }
     }
 }
