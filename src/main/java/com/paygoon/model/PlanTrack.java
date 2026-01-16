@@ -78,6 +78,9 @@ public class PlanTrack {
     @Column(name = "route_xml", columnDefinition = "LONGTEXT")
     private String routeXml;
 
+    @Column(name = "route_xml", columnDefinition = "LONGTEXT")
+    private String routeXml;
+
     @Column(name = "sort_order", columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer sortOrder = 0;
 

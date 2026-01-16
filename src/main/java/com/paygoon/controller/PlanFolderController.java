@@ -135,11 +135,6 @@ public class PlanFolderController {
         AppUser requester = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        if (!requester.getId().equals(request.createdByUserId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new PlanTrackImportResponse(null, "Usuario no autorizado", -3));
-        }
-
         PlanFolder folder = planFolderRepository.findById(request.folderId())
                 .orElse(null);
         if (folder == null) {

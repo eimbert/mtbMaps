@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record PlanTrackImportRequest(
-        @JsonProperty("created_by_user_id") @NotNull Long createdByUserId,
+        @JsonProperty("created_by_user_id") Long createdByUserId,
         @JsonProperty("distance_km") BigDecimal distanceKm,
         @JsonProperty("folder_id") @NotNull Long folderId,
         @JsonProperty("moving_time_sec") Integer movingTimeSec,
