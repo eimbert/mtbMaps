@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.paygoon.dto.PlanFolderCreateRequest;
 import com.paygoon.dto.PlanFolderCreateResponse;
 import com.paygoon.dto.PlanFolderListItemResponse;
+import com.paygoon.dto.PlanFolderUpdateRequest;
 import com.paygoon.dto.PlanTrackImportRequest;
 import com.paygoon.dto.PlanTrackImportResponse;
 import com.paygoon.dto.PlanTrackListItemResponse;
@@ -126,6 +128,49 @@ public class PlanFolderController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderCreateResponse(null, "No se pudo crear la carpeta del plan", -99));
+        }
+    }
+
+    @PutMapping("/{folderId}")
+    public ResponseEntity<PlanFolderCreateResponse> updatePlanFolder(
+            @Valid @RequestBody PlanFolderUpdateRequest request,
+            @Valid @PathVariable Long folderId,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanFolderCreateResponse(null, "No autenticado", -1));
+        }
+
+        AppUser requester = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        PlanFolder folder = planFolderRepository.findById(folderId).orElse(null);
+        if (folder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanFolderCreateResponse(null, "Carpeta no encontrada", -2));
+        }
+
+        if (folder.getOwner() != null && !folder.getOwner().getId().equals(requester.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new PlanFolderCreateResponse(folderId, "No autorizado", -3));
+        }
+
+        try {
+            folder.setName(request.name());
+            folder.setPlannedDate(request.plannedDate());
+            folder.setObservations(request.observations());
+
+            PlanFolder savedPlanFolder = planFolderRepository.save(folder);
+
+            return ResponseEntity.ok(new PlanFolderCreateResponse(
+                    savedPlanFolder.getId(),
+                    "Carpeta de plan actualizada correctamente",
+                    0
+            ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanFolderCreateResponse(folderId, "No se pudo actualizar la carpeta del plan", -99));
         }
     }
 
