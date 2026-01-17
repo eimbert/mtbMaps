@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -214,6 +215,26 @@ public class PlanFolderController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/tracks/{trackId}")
+    public ResponseEntity<Void> deletePlanTrack(
+            @Valid @PathVariable Long trackId,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        PlanTrack track = planTrackRepository.findById(trackId).orElse(null);
+        if (track == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        planTrackVoteRepository.deleteByTrackId(trackId);
+        planTrackRepository.delete(track);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{folderId}/votes")
