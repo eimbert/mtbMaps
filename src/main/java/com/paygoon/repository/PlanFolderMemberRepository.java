@@ -12,5 +12,7 @@ import com.paygoon.model.PlanFolderMember;
 public interface PlanFolderMemberRepository extends JpaRepository<PlanFolderMember, Long> {
     List<PlanFolderMember> findByUser(AppUser user);
 
+    List<PlanFolderMember> findByNickname(String nickname);
+
     boolean existsByFolderIdAndUserId(Long folderId, Long userId);
 }

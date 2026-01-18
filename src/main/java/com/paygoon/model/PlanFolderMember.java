@@ -56,6 +56,9 @@ public class PlanFolderMember {
     @Column(nullable = false, length = 10)
     private Status status = Status.pending;
 
+    @Column(name = "nickname", length = 120)
+    private String nickname;
+
     @Column(name = "invited_email", length = 320)
     private String invitedEmail;
 

@@ -175,6 +175,7 @@ public class PlanFolderController {
             PlanFolderMember member = new PlanFolderMember();
             member.setFolder(folder);
             member.setUser(memberUser);
+            member.setNickname(memberUser.getNickname());
             member.setInvitedEmail(request.email());
             member.setInvitedBy(requester);
             member.setStatus(PlanFolderMember.Status.pending);
