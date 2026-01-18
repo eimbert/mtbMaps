@@ -23,6 +23,7 @@ import com.paygoon.dto.PlanFolderInvitationListItemResponse;
 import com.paygoon.dto.PlanFolderListItemResponse;
 import com.paygoon.dto.PlanFolderMemberCreateRequest;
 import com.paygoon.dto.PlanFolderMemberCreateResponse;
+import com.paygoon.dto.PlanFolderMemberDeleteRequest;
 import com.paygoon.dto.PlanFolderUpdateRequest;
 import com.paygoon.dto.PlanTrackImportRequest;
 import com.paygoon.dto.PlanTrackImportResponse;
@@ -193,6 +194,37 @@ public class PlanFolderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderMemberCreateResponse(null, "No se pudo agregar el miembro", -99));
         }
+    }
+
+    @DeleteMapping("/members")
+    public ResponseEntity<Void> removePlanFolderMember(
+            @Valid @RequestBody PlanFolderMemberDeleteRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        PlanFolder folder = planFolderRepository.findById(request.folderId()).orElse(null);
+        if (folder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        AppUser memberUser = userRepository.findById(request.userId()).orElse(null);
+        if (memberUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        PlanFolderMember member = planFolderMemberRepository
+                .findByFolderIdAndUserId(request.folderId(), request.userId())
+                .orElse(null);
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        planFolderMemberRepository.delete(member);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{folderId}/invitations")

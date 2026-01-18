@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.paygoon.model.AppUser;
 import com.paygoon.model.PlanFolderMember;
@@ -17,4 +18,6 @@ public interface PlanFolderMemberRepository extends JpaRepository<PlanFolderMemb
     List<PlanFolderMember> findByFolderId(Long folderId);
 
     boolean existsByFolderIdAndUserId(Long folderId, Long userId);
+
+    Optional<PlanFolderMember> findByFolderIdAndUserId(Long folderId, Long userId);
 }
