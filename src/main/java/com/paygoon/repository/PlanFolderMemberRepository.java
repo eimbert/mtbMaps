@@ -14,5 +14,7 @@ public interface PlanFolderMemberRepository extends JpaRepository<PlanFolderMemb
 
     List<PlanFolderMember> findByNickname(String nickname);
 
+    List<PlanFolderMember> findByFolderId(Long folderId);
+
     boolean existsByFolderIdAndUserId(Long folderId, Long userId);
 }
