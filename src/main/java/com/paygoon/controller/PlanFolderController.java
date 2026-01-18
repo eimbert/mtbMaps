@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.paygoon.dto.PlanFolderCreateRequest;
 import com.paygoon.dto.PlanFolderCreateResponse;
+import com.paygoon.dto.PlanFolderInvitationListItemResponse;
 import com.paygoon.dto.PlanFolderListItemResponse;
 import com.paygoon.dto.PlanFolderMemberCreateRequest;
 import com.paygoon.dto.PlanFolderMemberCreateResponse;
@@ -192,6 +193,39 @@ public class PlanFolderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderMemberCreateResponse(null, "No se pudo agregar el miembro", -99));
         }
+    }
+
+    @GetMapping("/{folderId}/invitations")
+    public ResponseEntity<List<PlanFolderInvitationListItemResponse>> getPlanFolderInvitations(
+            @Valid @PathVariable Long folderId,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(List.of());
+        }
+
+        PlanFolder folder = planFolderRepository.findById(folderId).orElse(null);
+        if (folder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+        }
+
+        List<PlanFolderMember> members = planFolderMemberRepository.findByFolderId(folderId);
+        List<PlanFolderInvitationListItemResponse> response = new ArrayList<>();
+        for (PlanFolderMember member : members) {
+            AppUser memberUser = member.getUser();
+            response.add(new PlanFolderInvitationListItemResponse(
+                    member.getId(),
+                    folderId,
+                    memberUser != null ? memberUser.getId() : null,
+                    memberUser != null ? memberUser.getName() : null,
+                    memberUser != null ? memberUser.getEmail() : null,
+                    member.getNickname(),
+                    member.getRole(),
+                    member.getStatus()
+            ));
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{folderId}")
