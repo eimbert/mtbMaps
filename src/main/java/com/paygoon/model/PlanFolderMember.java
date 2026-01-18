@@ -85,6 +85,7 @@ public class PlanFolderMember {
 
     public enum Status {
         pending,
+        sending,
         accepted,
         rejected,
         revoked
