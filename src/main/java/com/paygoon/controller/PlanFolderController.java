@@ -335,6 +335,7 @@ public class PlanFolderController {
             planTrack.setDistanceKm(request.distanceKm());
             planTrack.setMovingTimeSec(request.movingTimeSec());
             planTrack.setTotalTimeSec(request.totalTimeSec());
+            planTrack.setDesnivel(request.desnivel());
             planTrack.setRouteXml(request.routeXml());
             planTrack.setSourceType(PlanTrack.SourceType.import_gpx);
 
@@ -380,6 +381,7 @@ public class PlanFolderController {
                     track.getDistanceKm(),
                     track.getMovingTimeSec(),
                     track.getTotalTimeSec(),
+                    track.getDesnivel(),
                     track.getHowToGetUrl(),
                     track.getSourceType(),
                     track.getGpxStoragePath(),

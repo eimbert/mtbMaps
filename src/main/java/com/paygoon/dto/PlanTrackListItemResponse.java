@@ -16,6 +16,7 @@ public record PlanTrackListItemResponse(
         BigDecimal distanceKm,
         Integer movingTimeSec,
         Integer totalTimeSec,
+        Long desnivel,
         String howToGetUrl,
         PlanTrack.SourceType sourceType,
         String gpxStoragePath,

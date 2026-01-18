@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 
 public record PlanTrackImportRequest(
         @JsonProperty("created_by_user_id") Long createdByUserId,
+        @JsonProperty("desnivel") Long desnivel,
         @JsonProperty("distance_km") BigDecimal distanceKm,
         @JsonProperty("folder_id") @NotNull Long folderId,
         @JsonProperty("moving_time_sec") Integer movingTimeSec,

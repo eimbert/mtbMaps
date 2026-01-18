@@ -65,6 +65,9 @@ public class PlanTrack {
     @Column(name = "total_time_sec", columnDefinition = "INT UNSIGNED")
     private Integer totalTimeSec;
 
+    @Column(name = "desnivel", columnDefinition = "BIGINT")
+    private Long desnivel;
+
     @Column(name = "how_to_get_url", length = 600)
     private String howToGetUrl;
 
