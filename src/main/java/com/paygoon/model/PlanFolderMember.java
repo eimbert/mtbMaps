@@ -3,6 +3,7 @@ package com.paygoon.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +30,8 @@ import lombok.Setter;
                 @UniqueConstraint(name = "uq_plan_folder_members", columnNames = {"folder_id", "user_id"})
         },
         indexes = {
-                @Index(name = "idx_plan_folder_members_user", columnList = "user_id")
+                @Index(name = "idx_plan_folder_members_user", columnList = "user_id"),
+                @Index(name = "fk_plan_folder_members_invited_by", columnList = "invited_by")
         })
 public class PlanFolderMember {
 
@@ -50,16 +52,38 @@ public class PlanFolderMember {
     @Column(nullable = false, length = 10)
     private Role role = Role.viewer;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Status status = Status.pending;
+
+    @Column(name = "invited_email", length = 320)
+    private String invitedEmail;
+
+    @ManyToOne
+    @JoinColumn(name = "invited_by", columnDefinition = "BIGINT")
+    private AppUser invitedBy;
+
     @Column(name = "can_vote", nullable = false)
     private Boolean canVote = true;
 
     @CreationTimestamp
-    @Column(name = "joined_at", nullable = false, updatable = false)
-    private LocalDateTime joinedAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "modified_at", nullable = false)
+    private LocalDateTime modifiedAt;
 
     public enum Role {
         owner,
         editor,
         viewer
+    }
+
+    public enum Status {
+        pending,
+        accepted,
+        rejected,
+        revoked
     }
 }
