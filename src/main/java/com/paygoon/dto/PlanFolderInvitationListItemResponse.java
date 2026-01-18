@@ -1,5 +1,7 @@
 package com.paygoon.dto;
 
+import java.time.LocalDateTime;
+
 import com.paygoon.model.PlanFolderMember;
 
 public record PlanFolderInvitationListItemResponse(
@@ -10,6 +12,7 @@ public record PlanFolderInvitationListItemResponse(
         String email,
         String nickname,
         PlanFolderMember.Role role,
-        PlanFolderMember.Status status
+        PlanFolderMember.Status status,
+        LocalDateTime modifiedAt
 ) {
 }

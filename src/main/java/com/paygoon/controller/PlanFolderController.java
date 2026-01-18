@@ -221,7 +221,8 @@ public class PlanFolderController {
                     memberUser != null ? memberUser.getEmail() : null,
                     member.getNickname(),
                     member.getRole(),
-                    member.getStatus()
+                    member.getStatus(),
+                    member.getModifiedAt()
             ));
         }
 
