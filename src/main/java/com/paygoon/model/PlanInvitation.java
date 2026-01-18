@@ -84,6 +84,7 @@ public class PlanInvitation {
 
     public enum Status {
         pending,
+        sending,
         accepted,
         declined,
         revoked,
