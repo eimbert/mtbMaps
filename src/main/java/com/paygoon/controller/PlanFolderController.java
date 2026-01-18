@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.paygoon.dto.PlanFolderCreateRequest;
 import com.paygoon.dto.PlanFolderCreateResponse;
 import com.paygoon.dto.PlanFolderListItemResponse;
+import com.paygoon.dto.PlanFolderMemberCreateRequest;
+import com.paygoon.dto.PlanFolderMemberCreateResponse;
 import com.paygoon.dto.PlanFolderUpdateRequest;
 import com.paygoon.dto.PlanTrackImportRequest;
 import com.paygoon.dto.PlanTrackImportResponse;
@@ -128,6 +130,66 @@ public class PlanFolderController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderCreateResponse(null, "No se pudo crear la carpeta del plan", -99));
+        }
+    }
+
+    @PostMapping("/members")
+    public ResponseEntity<PlanFolderMemberCreateResponse> addPlanFolderMember(
+            @Valid @RequestBody PlanFolderMemberCreateRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanFolderMemberCreateResponse(null, "No autenticado", -1));
+        }
+
+        AppUser requester = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        PlanFolder folder = planFolderRepository.findById(request.folderId()).orElse(null);
+        if (folder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanFolderMemberCreateResponse(null, "Carpeta no encontrada", -2));
+        }
+
+        AppUser memberUser = null;
+        if (request.userId() != null) {
+            memberUser = userRepository.findById(request.userId()).orElse(null);
+        } else if (request.email() != null && !request.email().isBlank()) {
+            memberUser = userRepository.findByEmail(request.email()).orElse(null);
+        } else if (request.nickname() != null && !request.nickname().isBlank()) {
+            memberUser = userRepository.findByNickname(request.nickname()).orElse(null);
+        }
+
+        if (memberUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanFolderMemberCreateResponse(null, "Usuario no encontrado", -3));
+        }
+
+        if (planFolderMemberRepository.existsByFolderIdAndUserId(folder.getId(), memberUser.getId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new PlanFolderMemberCreateResponse(null, "El usuario ya pertenece a la carpeta", -4));
+        }
+
+        try {
+            PlanFolderMember member = new PlanFolderMember();
+            member.setFolder(folder);
+            member.setUser(memberUser);
+            member.setInvitedEmail(request.email());
+            member.setInvitedBy(requester);
+            member.setStatus(PlanFolderMember.Status.pending);
+
+            PlanFolderMember savedMember = planFolderMemberRepository.save(member);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new PlanFolderMemberCreateResponse(
+                            savedMember.getId(),
+                            "Miembro agregado correctamente",
+                            0
+                    ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanFolderMemberCreateResponse(null, "No se pudo agregar el miembro", -99));
         }
     }
 
