@@ -24,6 +24,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "mensajes", indexes = {
         @Index(name = "idx_mensajes_id_usuario", columnList = "id_usuario"),
+        @Index(name = "idx_mensajes_id_usuario_msg", columnList = "id_usuario_msg"),
         @Index(name = "idx_mensajes_tipo_estado", columnList = "tipo_msg, estado")
 })
 public class Mensaje {
@@ -36,6 +37,10 @@ public class Mensaje {
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_usuario", nullable = false, columnDefinition = "BIGINT")
     private AppUser user;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario_msg", columnDefinition = "BIGINT")
+    private AppUser userMsg;
 
     @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String mensaje;
