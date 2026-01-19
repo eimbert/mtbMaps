@@ -8,5 +8,6 @@ public record MensajeCreateRequest(
         Long userMsgId,
         @NotBlank String mensaje,
         @NotNull Integer tipoMsg,
-        Integer estado
+        Integer estado,
+        Long idInvitacion
 ) {}

@@ -19,6 +19,8 @@ import com.paygoon.dto.MensajeEstadoUpdateRequest;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.Mensaje;
 import com.paygoon.repository.MensajeRepository;
+import com.paygoon.model.PlanFolderMember;
+import com.paygoon.repository.PlanFolderMemberRepository;
 import com.paygoon.repository.UserRepository;
 
 import jakarta.validation.Valid;
@@ -31,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class MensajeController {
 
     private final MensajeRepository mensajeRepository;
+    private final PlanFolderMemberRepository planFolderMemberRepository;
     private final UserRepository userRepository;
 
     @PostMapping
@@ -53,6 +56,7 @@ public class MensajeController {
         mensaje.setMensaje(request.mensaje());
         mensaje.setTipoMsg(request.tipoMsg());
         mensaje.setEstado(request.estado());
+        mensaje.setIdInvitacion(request.idInvitacion());
 
         Mensaje savedMensaje = mensajeRepository.save(mensaje);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedMensaje);
@@ -79,6 +83,17 @@ public class MensajeController {
         }
 
         mensaje.setEstado(request.estado());
+        if (Integer.valueOf(1).equals(mensaje.getTipoMsg()) && mensaje.getIdInvitacion() != null) {
+            PlanFolderMember member = planFolderMemberRepository.findById(mensaje.getIdInvitacion()).orElse(null);
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            PlanFolderMember.Status status = Integer.valueOf(1).equals(request.estado())
+                    ? PlanFolderMember.Status.accepted
+                    : PlanFolderMember.Status.rejected;
+            member.setStatus(status);
+            planFolderMemberRepository.save(member);
+        }
         Mensaje updatedMensaje = mensajeRepository.save(mensaje);
         return ResponseEntity.ok(updatedMensaje);
     }
