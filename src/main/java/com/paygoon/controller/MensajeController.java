@@ -18,6 +18,7 @@ import com.paygoon.dto.MensajeCreateRequest;
 import com.paygoon.dto.MensajeEstadoUpdateRequest;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.Mensaje;
+import com.paygoon.model.PlanInvitation;
 import com.paygoon.repository.MensajeRepository;
 import com.paygoon.model.PlanFolderMember;
 import com.paygoon.repository.PlanFolderMemberRepository;
