@@ -20,7 +20,8 @@ import com.paygoon.model.AppUser;
 import com.paygoon.model.Mensaje;
 import com.paygoon.model.PlanInvitation;
 import com.paygoon.repository.MensajeRepository;
-import com.paygoon.repository.PlanInvitationRepository;
+import com.paygoon.model.PlanFolderMember;
+import com.paygoon.repository.PlanFolderMemberRepository;
 import com.paygoon.repository.UserRepository;
 
 import jakarta.validation.Valid;
@@ -33,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class MensajeController {
 
     private final MensajeRepository mensajeRepository;
-    private final PlanInvitationRepository planInvitationRepository;
+    private final PlanFolderMemberRepository planFolderMemberRepository;
     private final UserRepository userRepository;
 
     @PostMapping
@@ -84,15 +85,15 @@ public class MensajeController {
 
         mensaje.setEstado(request.estado());
         if (Integer.valueOf(1).equals(mensaje.getTipoMsg()) && mensaje.getIdInvitacion() != null) {
-            PlanInvitation invitation = planInvitationRepository.findById(mensaje.getIdInvitacion()).orElse(null);
-            if (invitation == null) {
+            PlanFolderMember member = planFolderMemberRepository.findById(mensaje.getIdInvitacion()).orElse(null);
+            if (member == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            PlanInvitation.Status status = Integer.valueOf(1).equals(request.estado())
-                    ? PlanInvitation.Status.accepted
-                    : PlanInvitation.Status.declined;
-            invitation.setStatus(status);
-            planInvitationRepository.save(invitation);
+            PlanFolderMember.Status status = Integer.valueOf(1).equals(request.estado())
+                    ? PlanFolderMember.Status.accepted
+                    : PlanFolderMember.Status.rejected;
+            member.setStatus(status);
+            planFolderMemberRepository.save(member);
         }
         Mensaje updatedMensaje = mensajeRepository.save(mensaje);
         return ResponseEntity.ok(updatedMensaje);
