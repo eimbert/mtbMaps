@@ -51,6 +51,9 @@ public class Mensaje {
     @Column(name = "estado")
     private Integer estado;
 
+    @Column(name = "id_invitacion", columnDefinition = "BIGINT")
+    private Long idInvitacion;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
