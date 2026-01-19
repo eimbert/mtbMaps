@@ -39,9 +39,17 @@ public class MensajeController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        AppUser userMsg = null;
+        if (request.userMsgId() != null) {
+            userMsg = userRepository.findById(request.userMsgId()).orElse(null);
+            if (userMsg == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        }
 
         Mensaje mensaje = new Mensaje();
         mensaje.setUser(user);
+        mensaje.setUserMsg(userMsg);
         mensaje.setMensaje(request.mensaje());
         mensaje.setTipoMsg(request.tipoMsg());
         mensaje.setEstado(request.estado());
