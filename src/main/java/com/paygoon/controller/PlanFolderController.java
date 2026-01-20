@@ -82,7 +82,10 @@ public class PlanFolderController {
             ));
         }
 
-        List<PlanFolderMember> memberFolders = planFolderMemberRepository.findByUser(user);
+        List<PlanFolderMember> memberFolders = planFolderMemberRepository.findByUserAndStatus(
+                user,
+                PlanFolderMember.Status.accepted
+        );
         for (PlanFolderMember member : memberFolders) {
             PlanFolder folder = member.getFolder();
             if (folder.getOwner() != null && folder.getOwner().getId().equals(user.getId())) {
