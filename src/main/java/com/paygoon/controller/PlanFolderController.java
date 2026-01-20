@@ -24,6 +24,8 @@ import com.paygoon.dto.PlanFolderListItemResponse;
 import com.paygoon.dto.PlanFolderMemberCreateRequest;
 import com.paygoon.dto.PlanFolderMemberCreateResponse;
 import com.paygoon.dto.PlanFolderMemberDeleteRequest;
+import com.paygoon.dto.PlanFolderMemberStatusUpdateRequest;
+import com.paygoon.dto.PlanFolderMemberStatusUpdateResponse;
 import com.paygoon.dto.PlanFolderUpdateRequest;
 import com.paygoon.dto.PlanTrackImportRequest;
 import com.paygoon.dto.PlanTrackImportResponse;
@@ -193,6 +195,41 @@ public class PlanFolderController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderMemberCreateResponse(null, "No se pudo agregar el miembro", -99));
+        }
+    }
+
+    @PutMapping("/members")
+    public ResponseEntity<PlanFolderMemberStatusUpdateResponse> updatePlanFolderMemberStatus(
+            @Valid @RequestBody PlanFolderMemberStatusUpdateRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanFolderMemberStatusUpdateResponse(null, "No autenticado", -1));
+        }
+
+        PlanFolderMember member = planFolderMemberRepository.findById(request.id()).orElse(null);
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanFolderMemberStatusUpdateResponse(null, "Miembro no encontrado", -2));
+        }
+
+        try {
+            member.setStatus(request.status());
+            PlanFolderMember savedMember = planFolderMemberRepository.save(member);
+
+            return ResponseEntity.ok(new PlanFolderMemberStatusUpdateResponse(
+                    savedMember.getId(),
+                    "Estado actualizado correctamente",
+                    0
+            ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanFolderMemberStatusUpdateResponse(
+                            request.id(),
+                            "No se pudo actualizar el estado",
+                            -99
+                    ));
         }
     }
 
