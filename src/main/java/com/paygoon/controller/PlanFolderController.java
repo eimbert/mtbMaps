@@ -30,6 +30,8 @@ import com.paygoon.dto.PlanFolderUpdateRequest;
 import com.paygoon.dto.PlanTrackImportRequest;
 import com.paygoon.dto.PlanTrackImportResponse;
 import com.paygoon.dto.PlanTrackListItemResponse;
+import com.paygoon.dto.PlanTrackUpdateRequest;
+import com.paygoon.dto.PlanTrackUpdateResponse;
 import com.paygoon.dto.PlanTrackVoteListItemResponse;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.PlanFolder;
@@ -390,6 +392,37 @@ public class PlanFolderController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanTrackImportResponse(null, "No se pudo importar el track", -99));
+        }
+    }
+
+    @PutMapping("/updateTrack")
+    public ResponseEntity<PlanTrackUpdateResponse> updatePlanTrack(
+            @Valid @RequestBody PlanTrackUpdateRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackUpdateResponse(null, "No autenticado", -1));
+        }
+
+        PlanTrack track = planTrackRepository.findById(request.id()).orElse(null);
+        if (track == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackUpdateResponse(null, "Track no encontrado", -2));
+        }
+
+        try {
+            track.setRouteXml(request.routeXml());
+            PlanTrack savedTrack = planTrackRepository.save(track);
+
+            return ResponseEntity.ok(new PlanTrackUpdateResponse(
+                    savedTrack.getId(),
+                    "Track actualizado correctamente",
+                    0
+            ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanTrackUpdateResponse(track.getId(), "No se pudo actualizar el track", -99));
         }
     }
 
