@@ -49,12 +49,16 @@ import com.paygoon.repository.UserRepository;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/plan-folders")
 @RequiredArgsConstructor
 @Validated
 public class PlanFolderController {
+
+    private static final Logger log = LoggerFactory.getLogger(PlanFolderController.class);
 
     private final PlanFolderRepository planFolderRepository;
     private final PlanFolderMemberRepository planFolderMemberRepository;
@@ -585,6 +589,9 @@ public class PlanFolderController {
             vote.setFolder(planFolderRepository.getReferenceById(request.idFolder()));
             vote.setUser(user);
             vote.setTrack(planTrackRepository.getReferenceById(request.idTrack()));
+
+            log.info("[PLAN TRACK VOTE] Saving vote: folderId={}, trackId={}, userId={}",
+                    request.idFolder(), request.idTrack(), user.getId());
 
             PlanTrackVote savedVote = planTrackVoteRepository.save(vote);
 
