@@ -564,26 +564,23 @@ public class PlanFolderController {
         AppUser user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        PlanFolder folder = planFolderRepository.findById(request.idFolder()).orElse(null);
-        if (folder == null) {
+        if (!planFolderRepository.existsById(request.idFolder())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new PlanTrackVoteCreateResponse(null, "Carpeta no encontrada", -2));
         }
 
-        PlanTrack track = planTrackRepository.findById(request.idTrack()).orElse(null);
-        if (track == null || track.getFolder() == null
-                || !track.getFolder().getId().equals(folder.getId())) {
+        if (!planTrackRepository.existsByIdAndFolderId(request.idTrack(), request.idFolder())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new PlanTrackVoteCreateResponse(null, "Track no encontrado", -3));
         }
 
         try {
-            planTrackVoteRepository.deleteByFolderIdAndUserId(folder.getId(), user.getId());
+            planTrackVoteRepository.deleteByFolderIdAndUserId(request.idFolder(), user.getId());
 
             PlanTrackVote vote = new PlanTrackVote();
-            vote.setFolder(folder);
-            vote.setUser(user);
-            vote.setTrack(track);
+            vote.setFolder(planFolderRepository.getReferenceById(request.idFolder()));
+            vote.setUser(userRepository.getReferenceById(user.getId()));
+            vote.setTrack(planTrackRepository.getReferenceById(request.idTrack()));
 
             PlanTrackVote savedVote = planTrackVoteRepository.save(vote);
 
