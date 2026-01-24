@@ -563,6 +563,10 @@ public class PlanFolderController {
 
         AppUser user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        if (user.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackVoteCreateResponse(null, "Usuario no autenticado", -1));
+        }
 
         if (!planFolderRepository.existsById(request.idFolder())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -579,7 +583,7 @@ public class PlanFolderController {
 
             PlanTrackVote vote = new PlanTrackVote();
             vote.setFolder(planFolderRepository.getReferenceById(request.idFolder()));
-            vote.setUser(userRepository.getReferenceById(user.getId()));
+            vote.setUser(user);
             vote.setTrack(planTrackRepository.getReferenceById(request.idTrack()));
 
             PlanTrackVote savedVote = planTrackVoteRepository.save(vote);
