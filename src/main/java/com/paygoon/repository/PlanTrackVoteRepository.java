@@ -15,6 +15,8 @@ public interface PlanTrackVoteRepository extends JpaRepository<PlanTrackVote, Lo
 
     boolean existsByTrackIdAndUserId(Long trackId, Long userId);
 
+    java.util.Optional<PlanTrackVote> findByFolderIdAndUserIdAndTrackId(Long folderId, Long userId, Long trackId);
+
     void deleteByTrackId(Long trackId);
 
     void deleteByFolderId(Long folderId);

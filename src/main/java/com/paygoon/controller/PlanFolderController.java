@@ -34,6 +34,8 @@ import com.paygoon.dto.PlanTrackUpdateRequest;
 import com.paygoon.dto.PlanTrackUpdateResponse;
 import com.paygoon.dto.PlanTrackVoteCreateRequest;
 import com.paygoon.dto.PlanTrackVoteCreateResponse;
+import com.paygoon.dto.PlanTrackVoteDeleteRequest;
+import com.paygoon.dto.PlanTrackVoteDeleteResponse;
 import com.paygoon.dto.PlanTrackVoteListItemResponse;
 import com.paygoon.dto.PlanTrackVoteSummaryResponse;
 import com.paygoon.model.AppUser;
@@ -627,6 +629,55 @@ public class PlanFolderController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanTrackVoteCreateResponse(null, "No se pudo guardar el voto", -99));
+        }
+    }
+
+    @DeleteMapping("/votes")
+    public ResponseEntity<PlanTrackVoteDeleteResponse> deletePlanTrackVote(
+            @Valid @RequestBody PlanTrackVoteDeleteRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackVoteDeleteResponse(null, "No autenticado", -1));
+        }
+
+        AppUser user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        if (user.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackVoteDeleteResponse(null, "Usuario no autenticado", -1));
+        }
+
+        if (!planFolderRepository.existsById(request.idFolder())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackVoteDeleteResponse(null, "Carpeta no encontrada", -2));
+        }
+
+        if (!planTrackRepository.existsByIdAndFolderId(request.idTrack(), request.idFolder())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackVoteDeleteResponse(null, "Track no encontrado", -3));
+        }
+
+        PlanTrackVote vote = planTrackVoteRepository
+                .findByFolderIdAndUserIdAndTrackId(request.idFolder(), user.getId(), request.idTrack())
+                .orElse(null);
+        if (vote == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackVoteDeleteResponse(null, "Voto no encontrado", -4));
+        }
+
+        try {
+            planTrackVoteRepository.delete(vote);
+
+            return ResponseEntity.ok(new PlanTrackVoteDeleteResponse(
+                    vote.getId(),
+                    "Voto eliminado correctamente",
+                    0
+            ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanTrackVoteDeleteResponse(null, "No se pudo eliminar el voto", -99));
         }
     }
 }
