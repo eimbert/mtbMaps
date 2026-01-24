@@ -42,6 +42,7 @@ import com.paygoon.repository.PlanFolderRepository;
 import com.paygoon.repository.PlanFolderMemberRepository;
 import com.paygoon.repository.PlanTrackRepository;
 import com.paygoon.repository.PlanTrackVoteRepository;
+import com.paygoon.repository.PlanInvitationRepository;
 import com.paygoon.repository.UserRepository;
 
 import jakarta.validation.Valid;
@@ -57,6 +58,7 @@ public class PlanFolderController {
     private final PlanFolderMemberRepository planFolderMemberRepository;
     private final PlanTrackRepository planTrackRepository;
     private final PlanTrackVoteRepository planTrackVoteRepository;
+    private final PlanInvitationRepository planInvitationRepository;
     private final UserRepository userRepository;
 
     @GetMapping
@@ -344,6 +346,36 @@ public class PlanFolderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new PlanFolderCreateResponse(folderId, "No se pudo actualizar la carpeta del plan", -99));
         }
+    }
+
+    @DeleteMapping("/{folderId}")
+    public ResponseEntity<Void> deletePlanFolder(
+            @Valid @PathVariable Long folderId,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        AppUser requester = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        PlanFolder folder = planFolderRepository.findById(folderId).orElse(null);
+        if (folder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        if (folder.getOwner() != null && !folder.getOwner().getId().equals(requester.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        planTrackVoteRepository.deleteByFolderId(folderId);
+        planTrackRepository.deleteByFolderId(folderId);
+        planFolderMemberRepository.deleteByFolderId(folderId);
+        planInvitationRepository.deleteByFolderId(folderId);
+        planFolderRepository.delete(folder);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/tracks/import")

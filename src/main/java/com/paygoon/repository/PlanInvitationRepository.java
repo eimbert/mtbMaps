@@ -7,4 +7,5 @@ import com.paygoon.model.PlanInvitation;
 
 @Repository
 public interface PlanInvitationRepository extends JpaRepository<PlanInvitation, Long> {
+    void deleteByFolderId(Long folderId);
 }

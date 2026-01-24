@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface PlanTrackRepository extends JpaRepository<PlanTrack, Long> {
     List<PlanTrack> findByFolderId(Long folderId);
+
+    void deleteByFolderId(Long folderId);
 }

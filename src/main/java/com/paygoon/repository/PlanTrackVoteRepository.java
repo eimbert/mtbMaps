@@ -12,4 +12,6 @@ public interface PlanTrackVoteRepository extends JpaRepository<PlanTrackVote, Lo
     List<PlanTrackVote> findByFolderId(Long folderId);
 
     void deleteByTrackId(Long trackId);
+
+    void deleteByFolderId(Long folderId);
 }

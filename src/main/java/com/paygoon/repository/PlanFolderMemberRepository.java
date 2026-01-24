@@ -22,4 +22,6 @@ public interface PlanFolderMemberRepository extends JpaRepository<PlanFolderMemb
     boolean existsByFolderIdAndUserId(Long folderId, Long userId);
 
     Optional<PlanFolderMember> findByFolderIdAndUserId(Long folderId, Long userId);
+
+    void deleteByFolderId(Long folderId);
 }
