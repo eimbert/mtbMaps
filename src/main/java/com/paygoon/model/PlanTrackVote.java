@@ -23,13 +23,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "plan_tracks_votes",
+@Table(name = "plan_track_votes",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_plan_tracks_votes_one_per_user", columnNames = {"idFolder", "idUsu"})
+                @UniqueConstraint(name = "uq_plan_track_votes_one_per_user", columnNames = {"folder_id", "user_id"})
         },
         indexes = {
-                @Index(name = "idx_plan_tracks_votes_folder_track", columnList = "idFolder, idTrack"),
-                @Index(name = "idx_plan_tracks_votes_user", columnList = "idUsu")
+                @Index(name = "idx_plan_track_votes_folder_track", columnList = "folder_id, track_id"),
+                @Index(name = "idx_plan_track_votes_user", columnList = "user_id")
         })
 public class PlanTrackVote {
 
@@ -39,15 +39,15 @@ public class PlanTrackVote {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "idFolder", nullable = false, columnDefinition = "BIGINT")
+    @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "BIGINT")
     private PlanFolder folder;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "idUsu", nullable = false, columnDefinition = "BIGINT")
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BIGINT")
     private AppUser user;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "idTrack", nullable = false, columnDefinition = "BIGINT")
+    @JoinColumn(name = "track_id", nullable = false, columnDefinition = "BIGINT")
     private PlanTrack track;
 
     @CreationTimestamp
