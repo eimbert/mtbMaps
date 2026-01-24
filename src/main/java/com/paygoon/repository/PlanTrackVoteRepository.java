@@ -11,6 +11,10 @@ import java.util.List;
 public interface PlanTrackVoteRepository extends JpaRepository<PlanTrackVote, Long> {
     List<PlanTrackVote> findByFolderId(Long folderId);
 
+    long countByTrackId(Long trackId);
+
+    boolean existsByTrackIdAndUserId(Long trackId, Long userId);
+
     void deleteByTrackId(Long trackId);
 
     void deleteByFolderId(Long folderId);
