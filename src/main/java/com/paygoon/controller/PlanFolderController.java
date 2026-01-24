@@ -32,6 +32,8 @@ import com.paygoon.dto.PlanTrackImportResponse;
 import com.paygoon.dto.PlanTrackListItemResponse;
 import com.paygoon.dto.PlanTrackUpdateRequest;
 import com.paygoon.dto.PlanTrackUpdateResponse;
+import com.paygoon.dto.PlanTrackVoteCreateRequest;
+import com.paygoon.dto.PlanTrackVoteCreateResponse;
 import com.paygoon.dto.PlanTrackVoteListItemResponse;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.PlanFolder;
@@ -547,5 +549,54 @@ public class PlanFolderController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/votes")
+    public ResponseEntity<PlanTrackVoteCreateResponse> createPlanTrackVote(
+            @Valid @RequestBody PlanTrackVoteCreateRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackVoteCreateResponse(null, "No autenticado", -1));
+        }
+
+        AppUser user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        if (user.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new PlanTrackVoteCreateResponse(null, "Usuario no autenticado", -1));
+        }
+
+        if (!planFolderRepository.existsById(request.idFolder())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackVoteCreateResponse(null, "Carpeta no encontrada", -2));
+        }
+
+        if (!planTrackRepository.existsByIdAndFolderId(request.idTrack(), request.idFolder())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new PlanTrackVoteCreateResponse(null, "Track no encontrado", -3));
+        }
+
+        try {
+            planTrackVoteRepository.deleteByFolderIdAndUserId(request.idFolder(), user.getId());
+
+            PlanTrackVote vote = new PlanTrackVote();
+            vote.setFolder(planFolderRepository.getReferenceById(request.idFolder()));
+            vote.setUser(user);
+            vote.setTrack(planTrackRepository.getReferenceById(request.idTrack()));
+
+            PlanTrackVote savedVote = planTrackVoteRepository.save(vote);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new PlanTrackVoteCreateResponse(
+                            savedVote.getId(),
+                            "Voto guardado correctamente",
+                            0
+                    ));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PlanTrackVoteCreateResponse(null, "No se pudo guardar el voto", -99));
+        }
     }
 }

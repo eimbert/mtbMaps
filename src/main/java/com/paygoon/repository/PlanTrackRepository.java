@@ -12,4 +12,6 @@ public interface PlanTrackRepository extends JpaRepository<PlanTrack, Long> {
     List<PlanTrack> findByFolderId(Long folderId);
 
     void deleteByFolderId(Long folderId);
+
+    boolean existsByIdAndFolderId(Long id, Long folderId);
 }
