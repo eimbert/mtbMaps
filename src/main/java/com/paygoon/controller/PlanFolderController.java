@@ -35,6 +35,7 @@ import com.paygoon.dto.PlanTrackUpdateResponse;
 import com.paygoon.dto.PlanTrackVoteCreateRequest;
 import com.paygoon.dto.PlanTrackVoteCreateResponse;
 import com.paygoon.dto.PlanTrackVoteListItemResponse;
+import com.paygoon.dto.PlanTrackVoteSummaryResponse;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.PlanFolder;
 import com.paygoon.model.PlanFolderMember;
@@ -553,6 +554,28 @@ public class PlanFolderController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/tracks/{trackId}/votes-summary")
+    public ResponseEntity<PlanTrackVoteSummaryResponse> getPlanTrackVoteSummary(
+            @Valid @PathVariable Long trackId,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        AppUser user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        if (!planTrackRepository.existsById(trackId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        long totalVotes = planTrackVoteRepository.countByTrackId(trackId);
+        boolean votedByUser = planTrackVoteRepository.existsByTrackIdAndUserId(trackId, user.getId());
+
+        return ResponseEntity.ok(new PlanTrackVoteSummaryResponse(trackId, totalVotes, votedByUser));
     }
 
     @PostMapping("/votes")
