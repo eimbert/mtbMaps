@@ -7,5 +7,5 @@ import jakarta.validation.constraints.NotNull;
 
 public record PlanTrackUpdateRequest(
         @JsonProperty("id") @NotNull Long id,
-        @JsonProperty("route_xml") @NotBlank String routeXml
+        @NotBlank String routeXml
 ) {}
