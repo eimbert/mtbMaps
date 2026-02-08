@@ -1,7 +1,11 @@
 package com.paygoon.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.paygoon.model.PlanTrackVote;
 
@@ -19,7 +23,13 @@ public interface PlanTrackVoteRepository extends JpaRepository<PlanTrackVote, Lo
 
     void deleteByTrackId(Long trackId);
 
-    void deleteByFolderId(Long folderId);
+    @Modifying
+    @Transactional
+    @Query("delete from PlanTrackVote vote where vote.folder.id = :folderId")
+    void deleteByFolderId(@Param("folderId") Long folderId);
 
-    void deleteByFolderIdAndUserId(Long folderId, Long userId);
+    @Modifying
+    @Transactional
+    @Query("delete from PlanTrackVote vote where vote.folder.id = :folderId and vote.user.id = :userId")
+    void deleteByFolderIdAndUserId(@Param("folderId") Long folderId, @Param("userId") Long userId);
 }
