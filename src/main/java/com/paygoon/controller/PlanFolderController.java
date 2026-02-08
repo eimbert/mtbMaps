@@ -49,6 +49,7 @@ import com.paygoon.repository.PlanTrackRepository;
 import com.paygoon.repository.PlanTrackVoteRepository;
 import com.paygoon.repository.PlanInvitationRepository;
 import com.paygoon.repository.UserRepository;
+import com.paygoon.service.PlanFolderService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +70,7 @@ public class PlanFolderController {
     private final PlanTrackVoteRepository planTrackVoteRepository;
     private final PlanInvitationRepository planInvitationRepository;
     private final UserRepository userRepository;
+    private final PlanFolderService planFolderService;
 
     @GetMapping
     public ResponseEntity<List<PlanFolderListItemResponse>> getPlanFolders(Authentication authentication) {
@@ -378,11 +380,7 @@ public class PlanFolderController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        planTrackVoteRepository.deleteByFolderId(folderId);
-        planTrackRepository.deleteByFolderId(folderId);
-        planFolderMemberRepository.deleteByFolderId(folderId);
-        planInvitationRepository.deleteByFolderId(folderId);
-        planFolderRepository.delete(folder);
+        planFolderService.deletePlanFolder(folder);
 
         return ResponseEntity.noContent().build();
     }
