@@ -30,10 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     private static final List<String> AUTH_WHITELIST = List.of(
-        "/api/auth/login",
-        "/api/auth/register",
-        "/api/auth/signup",
-        "/api/auth/verify"
+        "/auth/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -83,6 +80,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authHeader == null || !authHeader.startsWith("Bearer ");
     }
 }
-
 
 
