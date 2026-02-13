@@ -34,7 +34,7 @@ import com.paygoon.security.JwtUtil;
 import com.paygoon.service.EmailVerificationService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthenticationController {
 
     @Autowired private AuthenticationManager authenticationManager;

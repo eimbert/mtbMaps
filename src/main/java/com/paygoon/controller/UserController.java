@@ -16,7 +16,7 @@ import com.paygoon.model.AppUser;
 import com.paygoon.repository.UserRepository;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired private UserRepository userRepository;

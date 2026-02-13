@@ -58,7 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/api/plan-folders")
+@RequestMapping("/plan-folders")
 @RequiredArgsConstructor
 @Validated
 public class PlanFolderController {

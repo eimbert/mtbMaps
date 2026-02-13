@@ -30,7 +30,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/tracks")
+@RequestMapping("/tracks")
 @RequiredArgsConstructor
 @Validated
 public class TrackController {
