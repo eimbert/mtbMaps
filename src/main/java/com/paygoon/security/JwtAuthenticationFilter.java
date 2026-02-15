@@ -30,8 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     private static final List<String> AUTH_WHITELIST = List.of(
-        "/auth/**",
-        "/api/auth/**"
+        "/auth/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
