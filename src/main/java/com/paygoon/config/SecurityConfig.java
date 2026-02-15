@@ -28,7 +28,7 @@ import com.paygoon.security.JwtAuthenticationFilter;
 public class SecurityConfig {
 
     @Autowired private JwtAuthenticationFilter jwtAuthFilter;
-    @Autowired private UserDetailsService userDetailsService;
+   // @Autowired private UserDetailsService userDetailsService;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -67,11 +67,13 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "http://127.0.0.1:4200",
-                "https://tracketeo.bike",
-                "https://www.tracketeo.bike"
-        ));
+        		  "http://localhost:4200",
+        		  "http://127.0.0.1:4200",
+        		  "https://tracketeo.bike",
+        		  "https://www.tracketeo.bike",
+        		  "https://tracketeo.bike/api",
+        		  "https://www.tracketeo.bike/api"
+        		));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));

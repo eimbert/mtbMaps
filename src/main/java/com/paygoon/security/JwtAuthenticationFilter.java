@@ -30,9 +30,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     private static final List<String> AUTH_WHITELIST = List.of(
-        "/auth/**",
-        "/api/auth/**"
-    );
+    	    "/auth/**",
+    	    "/api/auth/**",
+    	    "/error",
+    	    "/",
+    	    "/index.html",
+    	    "/*.css",
+    	    "/*.js",
+    	    "/*.png",
+    	    "/*.ico"
+    	);
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -71,14 +78,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String servletPath = request.getServletPath();
+        String path = request.getServletPath();
 
-        if (AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, servletPath))) {
+        // Preflight fuera siempre
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
-        String authHeader = request.getHeader("Authorization");
-        return authHeader == null || !authHeader.startsWith("Bearer ");
+        // Whitelist por ruta (login/register/verify)
+        return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
+
 }
 
