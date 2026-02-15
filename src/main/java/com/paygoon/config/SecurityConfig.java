@@ -40,10 +40,7 @@ public class SecurityConfig {
                         "/",
                         "/index.html",
                         "/register.html",
-                        "/verify.html",
-                        "/css/**",
-                        "/js/**",
-                        "/webjars/**"
+                        "/verify.html"
                 ).permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
