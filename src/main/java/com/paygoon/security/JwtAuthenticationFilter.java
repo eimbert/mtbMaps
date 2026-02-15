@@ -76,26 +76,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            return true;
-        }
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
 
-        String rawPath = request.getRequestURI();
-        String contextPath = request.getContextPath();
-
-        String path = rawPath;
-        if (contextPath != null && !contextPath.isBlank() && rawPath.startsWith(contextPath)) {
-            path = rawPath.substring(contextPath.length());
-        }
-
-        // Fallback defensivo para despliegues detrás de proxy con prefijo /api
-        if (path.startsWith("/api/")) {
-            path = path.substring(4);
-        } else if ("/api".equals(path)) {
-            path = "/";
-        }
-
-        final String normalizedPath = path;
-        return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, normalizedPath));
+        String path = request.getServletPath();
+        return path.startsWith("/auth/");
     }
+
 }
