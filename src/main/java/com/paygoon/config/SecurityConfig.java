@@ -66,12 +66,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-        		  "http://localhost:4200",
-        		  "http://127.0.0.1:4200",
-        		  "https://tracketeo.bike",
         		  "https://www.tracketeo.bike",
-        		  "https://tracketeo.bike/api",
-        		  "https://www.tracketeo.bike/api"
+        		  "https://tracketeo.bike"
+        		  
         		));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
