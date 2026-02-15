@@ -14,7 +14,7 @@
 	<version>0.0.1</version>
 	<packaging>war</packaging>
 	<name>Tracketeo.bike</name>
-	<description>Tracketeo.bike backend, prestamos entre particulares</description>
+	<description>Tracketeo.bike backend</description>
 	<url />
 	<licenses>
 		<license />
