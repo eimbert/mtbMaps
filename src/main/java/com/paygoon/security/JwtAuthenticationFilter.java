@@ -95,6 +95,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             path = "/";
         }
 
-        return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+        final String normalizedPath = path;
+        return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, normalizedPath));
     }
 }
