@@ -1,6 +1,5 @@
 package com.paygoon.security;
 
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,16 +29,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     private static final List<String> AUTH_WHITELIST = List.of(
-    	    "/auth/**",
-    	    "/api/auth/**",
-    	    "/error",
-    	    "/",
-    	    "/index.html",
-    	    "/*.css",
-    	    "/*.js",
-    	    "/*.png",
-    	    "/*.ico"
-    	);
+            "/auth/**",
+            "/error",
+            "/",
+            "/index.html",
+            "/*.css",
+            "/*.js",
+            "/*.png",
+            "/*.ico"
+    );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -78,16 +76,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-
-        // Preflight fuera siempre
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
-        // Whitelist por ruta (login/register/verify)
+        String rawPath = request.getRequestURI();
+        String contextPath = request.getContextPath();
+
+        String path = rawPath;
+        if (contextPath != null && !contextPath.isBlank() && rawPath.startsWith(contextPath)) {
+            path = rawPath.substring(contextPath.length());
+        }
+
+        // Fallback defensivo para despliegues detrás de proxy con prefijo /api
+        if (path.startsWith("/api/")) {
+            path = path.substring(4);
+        } else if ("/api".equals(path)) {
+            path = "/";
+        }
+
         return AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
-
 }
-
