@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                         "/auth/**",
+                        "/api/auth/**",
                         "/",
                         "/index.html",
                         "/register.html",
