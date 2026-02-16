@@ -1,5 +1,6 @@
 package com.paygoon.security;
 
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,14 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     private static final List<String> AUTH_WHITELIST = List.of(
-            "/auth/**",
-            "/error",
-            "/",
-            "/index.html",
-            "/*.css",
-            "/*.js",
-            "/*.png",
-            "/*.ico"
+        "/auth/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -76,10 +70,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
+        String servletPath = request.getServletPath();
 
-        String path = request.getServletPath();
-        return path.startsWith("/auth/");
+        if (AUTH_WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, servletPath))) {
+            return true;
+        }
+
+        String authHeader = request.getHeader("Authorization");
+        return authHeader == null || !authHeader.startsWith("Bearer ");
     }
-
 }
+
+

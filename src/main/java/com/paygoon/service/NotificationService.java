@@ -27,7 +27,7 @@ public class NotificationService {
     private final String mailPassword;
 
     public NotificationService(JavaMailSender mailSender,
-                               @Value("${app.mail.from:no-reply@tracketeo.bike}") String fromEmail,
+                               @Value("${app.mail.from:no-reply@paygoon.com}") String fromEmail,
                                @Value("${app.verification.base-url:http://localhost:8080}") String verificationBaseUrl,
                                @Value("${spring.mail.host:unknown}") String mailHost,
                                @Value("${spring.mail.port:unknown}") String mailPort,
@@ -45,7 +45,7 @@ public class NotificationService {
     public void sendVerificationEmail(AppUser user, String token, Duration expiration) {
         String link = verificationBaseUrl + "/api/auth/verify?token=" + token;
         String body = "Hola " + user.getName() + ",\n\n" +
-                "Gracias por registrarte en Tracketeo.bike. Haz clic en el siguiente enlace para verificar tu correo:" +
+                "Gracias por registrarte en PayGoon. Haz clic en el siguiente enlace para verificar tu correo:" +
                 "\n" + link + "\n\n" +
                 "El enlace vencerá en " + expiration.toHours() + " horas.";
 
@@ -56,7 +56,7 @@ public class NotificationService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setFrom(fromEmail);
-        message.setSubject("Verifica tu correo en Tracketeo.bike");
+        message.setSubject("Verifica tu correo en PayGoon");
         message.setText(body);
 
         try {

@@ -19,8 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 import com.paygoon.security.JwtAuthenticationFilter;
 
 @Configuration
@@ -28,7 +26,7 @@ import com.paygoon.security.JwtAuthenticationFilter;
 public class SecurityConfig {
 
     @Autowired private JwtAuthenticationFilter jwtAuthFilter;
-   // @Autowired private UserDetailsService userDetailsService;
+    @Autowired private UserDetailsService userDetailsService;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -42,7 +40,10 @@ public class SecurityConfig {
                         "/",
                         "/index.html",
                         "/register.html",
-                        "/verify.html"
+                        "/verify.html",
+                        "/css/**",
+                        "/js/**",
+                        "/webjars/**"
                 ).permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
@@ -65,15 +66,12 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-        		  "https://www.tracketeo.bike",
-        		  "https://tracketeo.bike"
-        		  
-        		));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
-        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setMaxAge(3600L);
+        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedOrigin("http://127.0.0.1:4200");
+        configuration.addAllowedOrigin("https://tracketeo.bike");
+        configuration.addAllowedOrigin("https://www.tracketeo.bike");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
