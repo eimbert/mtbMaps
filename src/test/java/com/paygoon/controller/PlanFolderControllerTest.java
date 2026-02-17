@@ -29,6 +29,7 @@ import com.paygoon.repository.PlanInvitationRepository;
 import com.paygoon.repository.PlanTrackRepository;
 import com.paygoon.repository.PlanTrackVoteRepository;
 import com.paygoon.repository.UserRepository;
+import com.paygoon.service.NotificationService;
 import com.paygoon.service.PlanFolderService;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +58,9 @@ class PlanFolderControllerTest {
 
     @Mock
     private PlanFolderService planFolderService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @Mock
     private Authentication authentication;
@@ -128,5 +132,6 @@ class PlanFolderControllerTest {
         assertThat(response.getBody().code()).isEqualTo(0);
         assertThat(response.getBody().id()).isEqualTo(99L);
         verify(mensajeRepository).save(any(Mensaje.class));
+        verify(notificationService).sendPlanFolderInvitationEmail(invitedUser, requester, folder);
     }
 }

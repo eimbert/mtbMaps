@@ -52,6 +52,7 @@ import com.paygoon.repository.PlanTrackRepository;
 import com.paygoon.repository.PlanTrackVoteRepository;
 import com.paygoon.repository.PlanInvitationRepository;
 import com.paygoon.repository.UserRepository;
+import com.paygoon.service.NotificationService;
 import com.paygoon.service.PlanFolderService;
 
 import jakarta.validation.Valid;
@@ -75,6 +76,7 @@ public class PlanFolderController {
     private final MensajeRepository mensajeRepository;
     private final UserRepository userRepository;
     private final PlanFolderService planFolderService;
+    private final NotificationService notificationService;
 
     @GetMapping
     public ResponseEntity<List<PlanFolderListItemResponse>> getPlanFolders(Authentication authentication) {
@@ -216,6 +218,7 @@ public class PlanFolderController {
             invitationMessage.setEstado(null);
             invitationMessage.setIdInvitacion(savedMember.getId());
             mensajeRepository.save(invitationMessage);
+            notificationService.sendPlanFolderInvitationEmail(memberUser, requester, folder);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new PlanFolderMemberCreateResponse(
