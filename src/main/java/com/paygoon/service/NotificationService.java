@@ -1,6 +1,7 @@
 package com.paygoon.service;
 
 import com.paygoon.model.AppUser;
+import com.paygoon.model.PlanFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final String fromEmail;
     private final String verificationBaseUrl;
+    private final String appHomeUrl;
     private final String mailHost;
     private final String mailPort;
     private final String mailUsername;
@@ -29,6 +31,7 @@ public class NotificationService {
     public NotificationService(JavaMailSender mailSender,
                                @Value("${app.mail.from:no-reply@paygoon.com}") String fromEmail,
                                @Value("${app.verification.base-url:http://localhost:8080}") String verificationBaseUrl,
+                               @Value("${app.home-url:https://tracketeo.bike}") String appHomeUrl,
                                @Value("${spring.mail.host:unknown}") String mailHost,
                                @Value("${spring.mail.port:unknown}") String mailPort,
                                @Value("${spring.mail.username:}") String mailUsername,
@@ -36,6 +39,7 @@ public class NotificationService {
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
         this.verificationBaseUrl = verificationBaseUrl;
+        this.appHomeUrl = appHomeUrl;
         this.mailHost = mailHost;
         this.mailPort = mailPort;
         this.mailUsername = mailUsername;
@@ -67,6 +71,36 @@ public class NotificationService {
             log.error("No se pudo enviar el correo de verificación a {}", user.getEmail(), ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "No se pudo enviar el correo de verificación");
+        }
+    }
+
+    public void sendPlanFolderInvitationEmail(AppUser invitedUser, AppUser invitedBy, PlanFolder folder) {
+        String inviterName = invitedBy != null && invitedBy.getName() != null && !invitedBy.getName().isBlank()
+                ? invitedBy.getName()
+                : "Un usuario";
+        String folderName = folder != null && folder.getName() != null && !folder.getName().isBlank()
+                ? folder.getName()
+                : "tu carpeta de plan";
+
+        String body = "Hola " + invitedUser.getName() + ",\n\n" +
+                inviterName + " te ha invitado a la carpeta '" + folderName + "' en Tracketeo.bike.\n" +
+                "Puedes entrar desde este enlace: " + appHomeUrl + "\n\n" +
+                "Una vez dentro de la app verás la invitación para aceptarla o rechazarla.";
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(invitedUser.getEmail());
+        message.setFrom(fromEmail);
+        message.setSubject("Tienes una invitación en Tracketeo.bike");
+        message.setText(body);
+
+        try {
+            mailSender.send(message);
+            log.info("[EMAIL] Invitación de carpeta enviada a {} para carpeta {}",
+                    invitedUser.getEmail(), folder != null ? folder.getId() : null);
+        } catch (MailException ex) {
+            log.error("No se pudo enviar el correo de invitación a {}", invitedUser.getEmail(), ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo enviar el correo de invitación");
         }
     }
 }
