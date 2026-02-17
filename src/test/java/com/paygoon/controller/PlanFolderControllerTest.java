@@ -1,6 +1,8 @@
 package com.paygoon.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,8 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
+import com.paygoon.dto.PlanFolderMemberCreateRequest;
+import com.paygoon.dto.PlanFolderMemberCreateResponse;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.PlanFolder;
+import com.paygoon.model.PlanFolderMember;
 import com.paygoon.repository.PlanFolderMemberRepository;
 import com.paygoon.repository.PlanFolderRepository;
 import com.paygoon.repository.PlanInvitationRepository;
@@ -77,5 +82,47 @@ class PlanFolderControllerTest {
         verify(planFolderMemberRepository).deleteByFolderId(42L);
         verify(planInvitationRepository).deleteByFolderId(42L);
         verify(planFolderRepository).delete(folder);
+    }
+
+    @Test
+    void addPlanFolderMemberReturnsCreatedWhenNotificationFails() {
+        AppUser requester = new AppUser();
+        requester.setId(7L);
+        requester.setEmail("owner@example.com");
+
+        AppUser invitedUser = new AppUser();
+        invitedUser.setId(17L);
+        invitedUser.setEmail("tramites1024@gmail.com");
+        invitedUser.setNickname("prueba");
+
+        PlanFolder folder = new PlanFolder();
+        folder.setId(13L);
+        folder.setOwner(requester);
+
+        PlanFolderMember savedMember = new PlanFolderMember();
+        savedMember.setId(99L);
+
+        when(authentication.getName()).thenReturn("owner@example.com");
+        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(requester));
+        when(planFolderRepository.findById(13L)).thenReturn(Optional.of(folder));
+        when(userRepository.findById(17L)).thenReturn(Optional.of(invitedUser));
+        when(planFolderMemberRepository.existsByFolderIdAndUserId(13L, 17L)).thenReturn(false);
+        when(planFolderMemberRepository.save(any(PlanFolderMember.class))).thenReturn(savedMember);
+        doThrow(new RuntimeException("smtp down")).when(notificationService)
+                .sendPlanFolderInvitationEmail(invitedUser, requester, folder);
+
+        PlanFolderMemberCreateRequest request = new PlanFolderMemberCreateRequest(
+                13L,
+                17L,
+                "tramites1024@gmail.com",
+                "prueba"
+        );
+
+        ResponseEntity<PlanFolderMemberCreateResponse> response = controller.addPlanFolderMember(request, authentication);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().code()).isEqualTo(0);
+        assertThat(response.getBody().id()).isEqualTo(99L);
     }
 }
