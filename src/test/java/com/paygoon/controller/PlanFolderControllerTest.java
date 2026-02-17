@@ -2,7 +2,6 @@ package com.paygoon.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,8 +19,10 @@ import org.springframework.security.core.Authentication;
 import com.paygoon.dto.PlanFolderMemberCreateRequest;
 import com.paygoon.dto.PlanFolderMemberCreateResponse;
 import com.paygoon.model.AppUser;
+import com.paygoon.model.Mensaje;
 import com.paygoon.model.PlanFolder;
 import com.paygoon.model.PlanFolderMember;
+import com.paygoon.repository.MensajeRepository;
 import com.paygoon.repository.PlanFolderMemberRepository;
 import com.paygoon.repository.PlanFolderRepository;
 import com.paygoon.repository.PlanInvitationRepository;
@@ -47,6 +48,9 @@ class PlanFolderControllerTest {
 
     @Mock
     private PlanInvitationRepository planInvitationRepository;
+
+    @Mock
+    private MensajeRepository mensajeRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -85,7 +89,7 @@ class PlanFolderControllerTest {
     }
 
     @Test
-    void addPlanFolderMemberReturnsCreatedWhenNotificationFails() {
+    void addPlanFolderMemberCreatesInvitationMessage() {
         AppUser requester = new AppUser();
         requester.setId(7L);
         requester.setEmail("owner@example.com");
@@ -108,8 +112,7 @@ class PlanFolderControllerTest {
         when(userRepository.findById(17L)).thenReturn(Optional.of(invitedUser));
         when(planFolderMemberRepository.existsByFolderIdAndUserId(13L, 17L)).thenReturn(false);
         when(planFolderMemberRepository.save(any(PlanFolderMember.class))).thenReturn(savedMember);
-        doThrow(new RuntimeException("smtp down")).when(notificationService)
-                .sendPlanFolderInvitationEmail(invitedUser, requester, folder);
+        when(mensajeRepository.save(any(Mensaje.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         PlanFolderMemberCreateRequest request = new PlanFolderMemberCreateRequest(
                 13L,
@@ -124,5 +127,6 @@ class PlanFolderControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().code()).isEqualTo(0);
         assertThat(response.getBody().id()).isEqualTo(99L);
+        verify(mensajeRepository).save(any(Mensaje.class));
     }
 }
