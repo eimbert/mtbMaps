@@ -85,7 +85,7 @@ public class NotificationService {
         String body = "Hola " + invitedUser.getName() + ",\n\n" +
                 inviterName + " te ha invitado a la carpeta '" + folderName + "' en Tracketeo.bike.\n" +
                 "Puedes entrar desde este enlace: " + appHomeUrl + "\n\n" +
-                "Una vez dentro de la app verás la invitación para aceptarla o rechazarla.";
+                "Una vez dentro de la app, en el apartado 'Planifica tus próximas salidas', verás la invitación para aceptarla o rechazarla.";
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(invitedUser.getEmail());
