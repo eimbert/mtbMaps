@@ -40,10 +40,12 @@ import com.paygoon.dto.PlanTrackVoteDeleteResponse;
 import com.paygoon.dto.PlanTrackVoteListItemResponse;
 import com.paygoon.dto.PlanTrackVoteSummaryResponse;
 import com.paygoon.model.AppUser;
+import com.paygoon.model.Mensaje;
 import com.paygoon.model.PlanFolder;
 import com.paygoon.model.PlanFolderMember;
 import com.paygoon.model.PlanTrack;
 import com.paygoon.model.PlanTrackVote;
+import com.paygoon.repository.MensajeRepository;
 import com.paygoon.repository.PlanFolderRepository;
 import com.paygoon.repository.PlanFolderMemberRepository;
 import com.paygoon.repository.PlanTrackRepository;
@@ -70,6 +72,7 @@ public class PlanFolderController {
     private final PlanTrackRepository planTrackRepository;
     private final PlanTrackVoteRepository planTrackVoteRepository;
     private final PlanInvitationRepository planInvitationRepository;
+    private final MensajeRepository mensajeRepository;
     private final UserRepository userRepository;
     private final PlanFolderService planFolderService;
 
@@ -204,6 +207,15 @@ public class PlanFolderController {
             member.setStatus(PlanFolderMember.Status.pending);
 
             PlanFolderMember savedMember = planFolderMemberRepository.save(member);
+
+            Mensaje invitationMessage = new Mensaje();
+            invitationMessage.setUser(memberUser);
+            invitationMessage.setUserMsg(requester);
+            invitationMessage.setMensaje("Te han invitado a la carpeta '" + folder.getName() + "'.");
+            invitationMessage.setTipoMsg(1);
+            invitationMessage.setEstado(null);
+            invitationMessage.setIdInvitacion(savedMember.getId());
+            mensajeRepository.save(invitationMessage);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new PlanFolderMemberCreateResponse(
