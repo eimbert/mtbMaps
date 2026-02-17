@@ -206,7 +206,13 @@ public class PlanFolderController {
             member.setStatus(PlanFolderMember.Status.pending);
 
             PlanFolderMember savedMember = planFolderMemberRepository.save(member);
-            notificationService.sendPlanFolderInvitationEmail(memberUser, requester, folder);
+
+            try {
+                notificationService.sendPlanFolderInvitationEmail(memberUser, requester, folder);
+            } catch (Exception ex) {
+                log.warn("Miembro {} agregado a carpeta {}, pero falló el envío de invitación por email",
+                        memberUser.getId(), folder.getId(), ex);
+            }
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new PlanFolderMemberCreateResponse(
