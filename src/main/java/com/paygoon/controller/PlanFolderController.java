@@ -97,6 +97,7 @@ public class PlanFolderController {
                     folder.getName(),
                     folder.getPlannedDate(),
                     folder.getObservations(),
+                    folder.getEventUrl(),
                     folder.getCreatedAt(),
                     folder.getUpdatedAt(),
                     null
@@ -118,6 +119,7 @@ public class PlanFolderController {
                     folder.getName(),
                     folder.getPlannedDate(),
                     folder.getObservations(),
+                    folder.getEventUrl(),
                     folder.getCreatedAt(),
                     folder.getUpdatedAt(),
                     member.getRole()
@@ -146,6 +148,7 @@ public class PlanFolderController {
             planFolder.setName(request.name());
             planFolder.setPlannedDate(request.plannedDate());
             planFolder.setObservations(request.observations());
+            planFolder.setEventUrl(request.eventUrl());
 
             PlanFolder savedPlanFolder = planFolderRepository.save(planFolder);
 
