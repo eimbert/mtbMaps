@@ -47,6 +47,9 @@ public class PlanFolder {
     @Column(columnDefinition = "TEXT")
     private String observations;
 
+    @Column(name = "event_url", length = 500)
+    private String eventUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

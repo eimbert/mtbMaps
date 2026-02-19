@@ -8,5 +8,6 @@ import jakarta.validation.constraints.Size;
 public record PlanFolderCreateRequest(
         @NotBlank @Size(max = 120) String name,
         LocalDate plannedDate,
-        @Size(max = 2000) String observations
+        @Size(max = 2000) String observations,
+        @Size(max = 500) String eventUrl
 ) {}

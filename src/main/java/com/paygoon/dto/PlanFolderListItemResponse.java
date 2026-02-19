@@ -11,6 +11,7 @@ public record PlanFolderListItemResponse(
         String name,
         LocalDate plannedDate,
         String observations,
+        String eventUrl,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         PlanFolderMember.Role role
