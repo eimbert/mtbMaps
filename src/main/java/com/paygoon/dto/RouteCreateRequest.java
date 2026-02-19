@@ -17,5 +17,6 @@ public record RouteCreateRequest(
         String gpxMaster,
         String province,
         @DecimalMin(value = "0.0", inclusive = false) BigDecimal distanceKm,
+        @Size(max = 500) String eventUrl,
         @Size(max = 64) String logoMime
 ) {}
