@@ -94,7 +94,7 @@ public class NominatimReverseService {
   }
 
   private TrackLocationDetails empty() {
-    return new TrackLocationDetails(null, null, null);
+    return new TrackLocationDetails(null, null, null, null);
   }
 
   private String cacheKey(double lat, double lon) {

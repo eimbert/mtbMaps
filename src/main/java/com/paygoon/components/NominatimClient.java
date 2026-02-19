@@ -39,28 +39,37 @@ public class NominatimClient {
       .bodyToMono(Map.class)
       .block();
 
-    if (json == null) return new TrackLocationDetails(null, null, null);
+    if (json == null) return new TrackLocationDetails(null, null, null, null);
 
     List<Object> features = (List<Object>) json.get("features");
-    if (features == null || features.isEmpty()) return new TrackLocationDetails(null, null, null);
+    if (features == null || features.isEmpty()) return new TrackLocationDetails(null, null, null, null);
 
     Map<String, Object> firstFeature = (Map<String, Object>) features.get(0);
     Map<String, Object> props = (Map<String, Object>) firstFeature.get("properties");
     Map<String, Object> geocoding = props == null ? null : (Map<String, Object>) props.get("geocoding");
-    if (geocoding == null) return new TrackLocationDetails(null, null, null);
+    if (geocoding == null) return new TrackLocationDetails(null, null, null, null);
 
-    String city = (String) geocoding.get("city");
+    Map<String, Object> admin = (Map<String, Object>) geocoding.get("admin");
+
+    String city = admin == null ? null : (String) admin.get("level8");
+    if (city == null) city = (String) geocoding.get("city");
     if (city == null) city = (String) geocoding.get("town");
     if (city == null) city = (String) geocoding.get("village");
 
-    String state = (String) geocoding.get("state");
-    String county = (String) geocoding.get("county");
+    String state = admin == null ? null : (String) admin.get("level4");
+    if (state == null) state = (String) geocoding.get("state");
+
+    String county = admin == null ? null : (String) admin.get("level7");
+    if (county == null) county = (String) geocoding.get("county");
+
+    String province = admin == null ? null : (String) admin.get("level6");
+    if (province == null) province = county != null ? county : state;
 
     return new TrackLocationDetails(
       city,
       state,
-      county != null ? county : state
+      county,
+      province
     );
   }
 }
-
