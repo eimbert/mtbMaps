@@ -84,6 +84,9 @@ public class Track {
     @Column(name = "provincia", length = 50)
     private String province;
 
+    @Column(name = "comarca", length = 50)
+    private String comarca;
+
     @Column(name = "poblacion", length = 70)
     private String population
 ;

@@ -88,6 +88,7 @@ public class TrackService {
         track.setYear(request.year());
         track.setAutonomousCommunity(request.autonomousCommunity());
         track.setProvince(request.province());
+        track.setComarca(request.comarca());
         track.setPopulation(request.population());
         track.setUploadedAt(request.uploadedAt() != null ? request.uploadedAt() : LocalDateTime.now());
         track.setCreatedBy(creator);
@@ -129,6 +130,7 @@ public class TrackService {
                 track.getYear(),
                 track.getAutonomousCommunity(),
                 track.getProvince(),
+                track.getComarca(),
                 track.getPopulation(),
                 buildStartLocationUrl(track),
                 track.getUploadedAt(),
