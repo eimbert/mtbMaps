@@ -54,6 +54,9 @@ public class Route {
     @Column(name = "distance_km", precision = 6, scale = 2)
     private BigDecimal distanceKm;
 
+    @Column(name = "event_url", length = 500)
+    private String eventUrl;
+
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private AppUser createdBy;
