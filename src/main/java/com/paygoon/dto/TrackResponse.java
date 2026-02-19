@@ -20,6 +20,7 @@ public record TrackResponse(
         Integer year,
         String autonomousCommunity,
         String province,
+        String comarca,
         String population,
         String startLocationUrl,
         LocalDateTime uploadedAt,

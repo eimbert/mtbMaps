@@ -23,6 +23,7 @@ public record TrackUploadRequest(
         Integer year,
         @Size(max = 50) String autonomousCommunity,
         @Size(max = 50) String province,
+        @Size(max = 50) String comarca,
         @Size(max = 70) String population,
         LocalDateTime uploadedAt,
         String title,
