@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
@@ -16,6 +19,8 @@ public record TrackUploadRequest(
         @PositiveOrZero Integer tiempoReal,
         LocalTime duracionRecorrido,
         @DecimalMin(value = "0.0", inclusive = true) BigDecimal distanceKm,
+        @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "100.0", inclusive = true) BigDecimal difficultyScore,
+        @Min(0) @Max(4) Short difficultyLevel,
         BigDecimal startLat,
         BigDecimal startLon,
         String routeXml,
