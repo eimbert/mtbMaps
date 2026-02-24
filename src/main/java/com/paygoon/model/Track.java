@@ -63,6 +63,12 @@ public class Track {
     @Column(name = "distance_km", precision = 6, scale = 2)
     private BigDecimal distanceKm;
 
+    @Column(name = "difficulty_score", precision = 5, scale = 2)
+    private BigDecimal difficultyScore;
+
+    @Column(name = "difficulty_level")
+    private Short difficultyLevel;
+
     @Column(name = "start_lat", precision = 15, scale = 12)
     private BigDecimal startLat;
 

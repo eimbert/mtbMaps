@@ -81,6 +81,8 @@ public class TrackService {
         track.setTiempoReal(request.tiempoReal());
         track.setDuracionRecorrido(request.duracionRecorrido());
         track.setDistanceKm(request.distanceKm());
+        track.setDifficultyScore(request.difficultyScore());
+        track.setDifficultyLevel(request.difficultyLevel());
         track.setStartLat(request.startLat());
         track.setStartLon(request.startLon());
         track.setRouteXml(request.routeXml());
@@ -126,6 +128,8 @@ public class TrackService {
                 track.getTiempoReal(),
                 track.getDuracionRecorrido(),
                 track.getDistanceKm(),
+                track.getDifficultyScore(),
+                track.getDifficultyLevel(),
                 track.getFileName(),
                 track.getYear(),
                 track.getAutonomousCommunity(),
