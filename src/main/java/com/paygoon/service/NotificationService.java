@@ -22,6 +22,7 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final String fromEmail;
     private final String verificationBaseUrl;
+    private final String resetPasswordBaseUrl;
     private final String appHomeUrl;
     private final String mailHost;
     private final String mailPort;
@@ -31,6 +32,7 @@ public class NotificationService {
     public NotificationService(JavaMailSender mailSender,
                                @Value("${app.mail.from:no-reply@paygoon.com}") String fromEmail,
                                @Value("${app.verification.base-url:http://localhost:8080}") String verificationBaseUrl,
+                               @Value("${app.reset-password.base-url:https://www.tracketeo.bike/reset-password}") String resetPasswordBaseUrl,
                                @Value("${app.home-url:https://tracketeo.bike}") String appHomeUrl,
                                @Value("${spring.mail.host:unknown}") String mailHost,
                                @Value("${spring.mail.port:unknown}") String mailPort,
@@ -39,6 +41,7 @@ public class NotificationService {
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
         this.verificationBaseUrl = verificationBaseUrl;
+        this.resetPasswordBaseUrl = resetPasswordBaseUrl;
         this.appHomeUrl = appHomeUrl;
         this.mailHost = mailHost;
         this.mailPort = mailPort;
@@ -101,6 +104,29 @@ public class NotificationService {
             log.error("No se pudo enviar el correo de invitación a {}", invitedUser.getEmail(), ex);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "No se pudo enviar el correo de invitación");
+        }
+    }
+
+    public void sendPasswordResetEmail(AppUser user, String token, Duration expiration) {
+        String link = resetPasswordBaseUrl + "?token=" + token;
+        String body = "Hola " + user.getName() + ",\n\n" +
+                "Hemos recibido una solicitud para restablecer tu contraseña en Tracketeo.bike.\n" +
+                "Haz clic en el siguiente enlace para establecer una nueva contraseña:\n" + link + "\n\n" +
+                "Este enlace vence en " + expiration.toMinutes() + " minutos. Si no solicitaste este cambio, puedes ignorar este correo.";
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setFrom(fromEmail);
+        message.setSubject("Recuperación de contraseña en Tracketeo.bike");
+        message.setText(body);
+
+        try {
+            mailSender.send(message);
+            log.info("[EMAIL] Enviando correo de recuperación a {} con enlace {}", user.getEmail(), link);
+        } catch (MailException ex) {
+            log.error("No se pudo enviar el correo de recuperación a {}", user.getEmail(), ex);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo enviar el correo de recuperación");
         }
     }
 }
