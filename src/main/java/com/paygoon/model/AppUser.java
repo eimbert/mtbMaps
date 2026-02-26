@@ -49,6 +49,10 @@ public class AppUser {
 
     private LocalDateTime lastVerificationEmailSentAt;
 
+    private LocalDateTime lastPasswordResetEmailSentAt;
+
+    private LocalDateTime passwordChangedAt;
+
     private boolean premium = false;
 
     private String documentType;
@@ -66,4 +70,3 @@ public class AppUser {
         }
     }
 }
-

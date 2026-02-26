@@ -42,6 +42,10 @@ public class JwtUtil {
         return extractAllClaims(token).getExpiration();
     }
 
+    public Date extractIssuedAt(String token) {
+        return extractAllClaims(token).getIssuedAt();
+    }
+
     public boolean validateToken(String token, UserDetails userDetails) {
         try {
             return extractUsername(token).equals(userDetails.getUsername())
@@ -63,4 +67,3 @@ public class JwtUtil {
             .getBody();
     }
 }
-
