@@ -6,6 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.paygoon.model.AppUser;
+import com.paygoon.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +19,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -28,6 +31,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private static final List<String> AUTH_WHITELIST = List.of(
         "/auth/**"
@@ -52,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            if (jwtUtil.validateToken(jwt, userDetails)) {
+            if (jwtUtil.validateToken(jwt, userDetails) && isTokenValidForPasswordChange(jwt, username)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -68,6 +74,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    private boolean isTokenValidForPasswordChange(String jwt, String username) {
+        AppUser user = userRepository.findByEmail(username).orElse(null);
+        if (user == null || user.getPasswordChangedAt() == null) {
+            return true;
+        }
+
+        java.util.Date issuedAt = jwtUtil.extractIssuedAt(jwt);
+        if (issuedAt == null) {
+            return false;
+        }
+
+        return !issuedAt.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .isBefore(user.getPasswordChangedAt());
+    }
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String servletPath = request.getServletPath();
@@ -80,5 +103,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return authHeader == null || !authHeader.startsWith("Bearer ");
     }
 }
-
 

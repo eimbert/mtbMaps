@@ -21,7 +21,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.paygoon.dto.AuthRequest;
 import com.paygoon.dto.AuthResponse;
+import com.paygoon.dto.ChangePasswordRequest;
+import com.paygoon.dto.ForgotPasswordRequest;
 import com.paygoon.dto.LoginResponse;
+import com.paygoon.dto.ResetPasswordRequest;
 import com.paygoon.dto.UserProfileResponse;
 import com.paygoon.dto.UserRegisterRequest;
 import com.paygoon.dto.VerificationRequest;
@@ -32,6 +35,7 @@ import com.paygoon.model.VerificationToken;
 import com.paygoon.repository.UserRepository;
 import com.paygoon.security.JwtUtil;
 import com.paygoon.service.EmailVerificationService;
+import com.paygoon.service.PasswordResetService;
 
 @RestController
 @RequestMapping("/auth")
@@ -42,6 +46,7 @@ public class AuthenticationController {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private EmailVerificationService emailVerificationService;
+    @Autowired private PasswordResetService passwordResetService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -235,5 +240,34 @@ public class AuthenticationController {
         }
     }
 
-}
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.email());
+        return ResponseEntity.ok(new AuthResponse("Si existe la cuenta, te hemos enviado un correo", 0));
+    }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok(new AuthResponse("Contraseña actualizada", 0));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no proporcionado");
+        }
+
+        String token = authorizationHeader.substring(7);
+        String email = jwtUtil.extractUsername(token);
+
+        AppUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        passwordResetService.changePassword(user, request.currentPassword(), request.newPassword());
+        return ResponseEntity.ok(new AuthResponse("Contraseña actualizada", 0));
+    }
+
+}
