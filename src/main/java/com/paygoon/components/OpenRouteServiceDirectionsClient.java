@@ -75,7 +75,7 @@ public class OpenRouteServiceDirectionsClient {
             try {
                 Map<String, Object> response = webClient.post()
                         .uri(ROUND_TRIP_PATH, profile)
-                        .header("Authorization", apiKey)
+                        .header("Authorization", buildAuthorizationHeader())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.valueOf("application/geo+json"))
                         .bodyValue(body)
@@ -100,11 +100,19 @@ public class OpenRouteServiceDirectionsClient {
                 Map<String, Object> geometry = (Map<String, Object>) firstFeature.get("geometry");
                 Map<String, Object> properties = (Map<String, Object>) firstFeature.get("properties");
                 Map<String, Object> summary = properties == null ? null : (Map<String, Object>) properties.get("summary");
+                List<Map<String, Object>> segments = properties == null ? null : (List<Map<String, Object>>) properties.get("segments");
+                Map<String, Object> firstSegment = segments == null || segments.isEmpty() ? null : segments.get(0);
 
                 List<List<Double>> routeCoordinates = geometry == null ? null : (List<List<Double>>) geometry.get("coordinates");
-                Double distance = toDouble(summary == null ? null : summary.get("distance"));
-                Double duration = toDouble(summary == null ? null : summary.get("duration"));
-                Double ascent = toDouble(summary == null ? null : summary.get("ascent"));
+                Double distance = firstNonNullNumber(
+                        summary == null ? null : summary.get("distance"),
+                        firstSegment == null ? null : firstSegment.get("distance"));
+                Double duration = firstNonNullNumber(
+                        summary == null ? null : summary.get("duration"),
+                        firstSegment == null ? null : firstSegment.get("duration"));
+                Double ascent = firstNonNullNumber(
+                        summary == null ? null : summary.get("ascent"),
+                        properties == null ? null : properties.get("ascent"));
                 return new DirectionsResult(routeCoordinates, distance, duration, ascent);
             } catch (RuntimeException ex) {
                 log.warn("ORS round-trip call failed profile={} payload={} attempt={}/{} message={}",
@@ -124,6 +132,17 @@ public class OpenRouteServiceDirectionsClient {
             return number.doubleValue();
         }
         return null;
+    }
+
+    private Double firstNonNullNumber(Object primary, Object fallback) {
+        Double primaryNumber = toDouble(primary);
+        return primaryNumber != null ? primaryNumber : toDouble(fallback);
+    }
+
+    private String buildAuthorizationHeader() {
+        return apiKey.regionMatches(true, 0, "Bearer ", 0, "Bearer ".length())
+                ? apiKey
+                : "Bearer " + apiKey;
     }
 
     public record DirectionsResult(
