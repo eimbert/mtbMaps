@@ -51,7 +51,7 @@ public class OpenRouteServiceDirectionsClient {
         }
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("coordinates", coordinates);
+        body.put("coordinates", List.of(coordinates));
         body.put("elevation", true);
 
         Map<String, Object> options = new LinkedHashMap<>();
@@ -66,7 +66,7 @@ public class OpenRouteServiceDirectionsClient {
         for (int attempt = 0; attempt <= retryCount; attempt++) {
             try {
                 Map<String, Object> response = webClient.post()
-                        .uri("/v2/directions/{profile}/json", profile)
+                        .uri("/v2/directions/{profile}/geojson", profile)
                         .header("Authorization", apiKey)
                         .bodyValue(body)
                         .retrieve()
