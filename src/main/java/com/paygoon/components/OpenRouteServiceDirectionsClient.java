@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -17,10 +19,14 @@ import reactor.core.publisher.Mono;
 @Component
 public class OpenRouteServiceDirectionsClient {
 
+    private static final Logger log = LoggerFactory.getLogger(OpenRouteServiceDirectionsClient.class);
+    private static final String ROUND_TRIP_PATH = "/v2/directions/{profile}/geojson";
+
     private final WebClient webClient;
     private final Duration timeout;
     private final int retryCount;
     private final String apiKey;
+    private final String baseUrl;
 
     public OpenRouteServiceDirectionsClient(
             WebClient.Builder builder,
@@ -36,6 +42,7 @@ public class OpenRouteServiceDirectionsClient {
         this.timeout = Duration.ofMillis(Math.max(1000, timeoutMs));
         this.retryCount = Math.max(0, retryCount);
         this.apiKey = apiKey == null ? "" : apiKey.trim();
+        this.baseUrl = baseUrl;
     }
 
     @SuppressWarnings("unchecked")
@@ -64,9 +71,11 @@ public class OpenRouteServiceDirectionsClient {
 
         RuntimeException lastError = null;
         for (int attempt = 0; attempt <= retryCount; attempt++) {
+            log.info("Calling ORS round-trip endpoint={}{} profile={} payload={} attempt={}/{}",
+                    baseUrl, ROUND_TRIP_PATH.replace("{profile}", profile), profile, body, attempt + 1, retryCount + 1);
             try {
                 Map<String, Object> response = webClient.post()
-                        .uri("/v2/directions/{profile}/geojson", profile)
+                        .uri(ROUND_TRIP_PATH, profile)
                         .header("Authorization", apiKey)
                         .bodyValue(body)
                         .retrieve()
@@ -97,6 +106,8 @@ public class OpenRouteServiceDirectionsClient {
                 Double ascent = toDouble(summary == null ? null : summary.get("ascent"));
                 return new DirectionsResult(routeCoordinates, distance, duration, ascent);
             } catch (RuntimeException ex) {
+                log.warn("ORS round-trip call failed profile={} payload={} attempt={}/{} message={}",
+                        profile, body, attempt + 1, retryCount + 1, ex.getMessage());
                 lastError = ex;
                 if (attempt == retryCount) {
                     throw ex;
