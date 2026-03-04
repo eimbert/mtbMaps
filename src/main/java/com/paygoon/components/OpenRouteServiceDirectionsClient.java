@@ -48,7 +48,8 @@ public class OpenRouteServiceDirectionsClient {
     public DirectionsResult fetchRoundTrip(
             String profile,
             List<Double> coordinates,
-            Map<String, Object> options
+            Map<String, Object> options,
+            List<String> extraInfo
     ) {
         if (apiKey.isBlank()) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "ORS API key not configured");
@@ -58,6 +59,9 @@ public class OpenRouteServiceDirectionsClient {
         body.put("coordinates", List.of(coordinates));
         body.put("elevation", true);
         body.put("options", options == null ? Map.of() : new LinkedHashMap<>(options));
+        if (extraInfo != null && !extraInfo.isEmpty()) {
+            body.put("extra_info", extraInfo);
+        }
 
         RuntimeException lastError = null;
         for (int attempt = 0; attempt <= retryCount; attempt++) {
@@ -91,6 +95,7 @@ public class OpenRouteServiceDirectionsClient {
                 Map<String, Object> geometry = (Map<String, Object>) firstFeature.get("geometry");
                 Map<String, Object> properties = (Map<String, Object>) firstFeature.get("properties");
                 Map<String, Object> summary = properties == null ? null : (Map<String, Object>) properties.get("summary");
+                Map<String, Object> extras = properties == null ? null : (Map<String, Object>) properties.get("extras");
                 List<Map<String, Object>> segments = properties == null ? null : (List<Map<String, Object>>) properties.get("segments");
                 Map<String, Object> firstSegment = segments == null || segments.isEmpty() ? null : segments.get(0);
 
@@ -104,7 +109,7 @@ public class OpenRouteServiceDirectionsClient {
                 Double ascent = firstNonNullNumber(
                         summary == null ? null : summary.get("ascent"),
                         properties == null ? null : properties.get("ascent"));
-                return new DirectionsResult(routeCoordinates, distance, duration, ascent);
+                return new DirectionsResult(routeCoordinates, distance, duration, ascent, extras);
             } catch (RuntimeException ex) {
                 log.warn("ORS round-trip call failed profile={} payload={} attempt={}/{} message={}",
                         profile, body, attempt + 1, retryCount + 1, ex.getMessage());
@@ -140,6 +145,7 @@ public class OpenRouteServiceDirectionsClient {
             List<List<Double>> coordinates,
             Double distanceMeters,
             Double durationSeconds,
-            Double ascentMeters) {
+            Double ascentMeters,
+            Map<String, Object> extras) {
     }
 }
