@@ -21,7 +21,7 @@ public class RoundTripRoutingService {
     private static final Set<String> ALLOWED_PROFILES = Set.of(
             "cycling-regular", "cycling-road", "cycling-mountain", "cycling-electric");
     private static final Set<String> ALLOWED_COMPLEXITIES = Set.of("simple", "medium", "technical");
-    private static final Set<String> ALLOWED_AVOID_FEATURES = Set.of("highways", "ferries", "steps", "tollways");
+    private static final Set<String> ALLOWED_AVOID_FEATURES = Set.of("ferries", "steps", "tollways");
 
     private final OpenRouteServiceDirectionsClient directionsClient;
 
@@ -119,7 +119,6 @@ public class RoundTripRoutingService {
         }
 
         Set<String> avoidFeatures = new LinkedHashSet<>();
-        avoidFeatures.add("highways");
         if (preferences != null && preferences.avoidFeatures() != null) {
             avoidFeatures.addAll(preferences.avoidFeatures());
         }
