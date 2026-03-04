@@ -29,7 +29,7 @@ public record RoundTripRouteRequest(
     }
 
     public record Preferences(
-            @Size(max = 8) List<@Pattern(regexp = "^(highways|ferries|steps|tollways)$") String> avoidFeatures,
+            @Size(max = 8) List<@Pattern(regexp = "^(ferries|steps|tollways)$") String> avoidFeatures,
             @Valid Weightings weightings,
             @Pattern(regexp = "^(balanced|trails|anti-asphalt|avoid-asphalt)$") String mode,
             @DecimalMin("0.0") @DecimalMax("1.0") Double strictness) {
