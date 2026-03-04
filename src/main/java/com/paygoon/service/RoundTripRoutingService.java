@@ -119,9 +119,7 @@ public class RoundTripRoutingService {
         }
 
         Set<String> avoidFeatures = new LinkedHashSet<>();
-        if ("cycling-mountain".equals(request.profile())) {
-            avoidFeatures.add("highways");
-        }
+        avoidFeatures.add("highways");
         if (preferences != null && preferences.avoidFeatures() != null) {
             avoidFeatures.addAll(preferences.avoidFeatures());
         }
@@ -155,7 +153,7 @@ public class RoundTripRoutingService {
         profileParams.put("weightings", weightings);
         options.put("profile_params", profileParams);
 
-        if (fallbackLevel < 2 && !preferences.avoidFeatures().isEmpty()) {
+        if (!preferences.avoidFeatures().isEmpty()) {
             options.put("avoid_features", preferences.avoidFeatures());
         }
 
