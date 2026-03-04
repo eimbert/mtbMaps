@@ -48,9 +48,7 @@ public class OpenRouteServiceDirectionsClient {
     public DirectionsResult fetchRoundTrip(
             String profile,
             List<Double> coordinates,
-            double lengthMeters,
-            int points,
-            int seed
+            Map<String, Object> options
     ) {
         if (apiKey.isBlank()) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "ORS API key not configured");
@@ -59,14 +57,7 @@ public class OpenRouteServiceDirectionsClient {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("coordinates", List.of(coordinates));
         body.put("elevation", true);
-
-        Map<String, Object> options = new LinkedHashMap<>();
-        Map<String, Object> roundTrip = new LinkedHashMap<>();
-        roundTrip.put("length", lengthMeters);
-        roundTrip.put("points", points);
-        roundTrip.put("seed", seed);
-        options.put("round_trip", roundTrip);
-        body.put("options", options);
+        body.put("options", options == null ? Map.of() : new LinkedHashMap<>(options));
 
         RuntimeException lastError = null;
         for (int attempt = 0; attempt <= retryCount; attempt++) {
