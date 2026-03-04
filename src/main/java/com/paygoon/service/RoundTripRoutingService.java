@@ -104,7 +104,7 @@ public class RoundTripRoutingService {
         if ("trails".equals(mode)) {
             green = Math.min(1.0, green + 0.15);
             quiet = Math.min(1.0, quiet + 0.05);
-        } else if ("anti-asphalt".equals(mode)) {
+        } else if ("anti-asphalt".equals(mode) || "avoid-asphalt".equals(mode)) {
             green = 0.9;
             quiet = Math.max(quiet, 0.7);
         }

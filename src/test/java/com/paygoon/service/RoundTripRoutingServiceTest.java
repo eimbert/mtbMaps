@@ -100,6 +100,39 @@ class RoundTripRoutingServiceTest {
         assertNotNull(response.warnings());
     }
 
+
+    @Test
+    void shouldSupportAvoidAsphaltModeAlias() {
+        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap()))
+                .thenReturn(new OpenRouteServiceDirectionsClient.DirectionsResult(
+                        List.of(
+                                List.of(2.361000, 41.637000),
+                                List.of(2.362100, 41.638200)),
+                        18000.0,
+                        3600.0,
+                        250.0));
+
+        RoundTripRouteResponse response = service.generateRoundTrip(new RoundTripRouteRequest(
+                "cycling-mountain",
+                "medium",
+                15.0,
+                new RoundTripRouteRequest.Start(41.637, 2.361),
+                new RoundTripRouteRequest.Preferences(
+                        List.of("highways"),
+                        null,
+                        "avoid-asphalt",
+                        1.0)));
+
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> profileParams = (java.util.Map<String, Object>) response.appliedOptions()
+                .get("profile_params");
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> weightings = (java.util.Map<String, Object>) profileParams.get("weightings");
+
+        assertEquals(0.9, ((Number) weightings.get("green")).doubleValue());
+        assertEquals(0.7, ((Number) weightings.get("quiet")).doubleValue());
+    }
+
     @Test
     void shouldRejectUnsupportedAvoidFeature() {
         RoundTripRoutingException ex = assertThrows(RoundTripRoutingException.class,
