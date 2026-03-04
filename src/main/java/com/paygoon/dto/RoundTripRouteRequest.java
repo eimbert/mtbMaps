@@ -36,7 +36,7 @@ public record RoundTripRouteRequest(
     }
 
     public record Weightings(
-            @DecimalMin("0.0") @DecimalMax("1.0") Double green,
-            @DecimalMin("0.0") @DecimalMax("1.0") Double quiet) {
+            @DecimalMin("0.0") @DecimalMax("2.0") Double green,
+            @DecimalMin("0.0") @DecimalMax("2.0") Double quiet) {
     }
 }
