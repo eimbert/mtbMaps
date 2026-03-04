@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,14 +36,15 @@ class RoundTripRoutingServiceTest {
 
     @Test
     void shouldReturnNormalizedRoundTripResponse() {
-        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap()))
+        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap(), anyList()))
                 .thenReturn(new OpenRouteServiceDirectionsClient.DirectionsResult(
                         List.of(
                                 List.of(2.361000, 41.637000, 123.4),
                                 List.of(2.362100, 41.638200, 125.0)),
                         34780.2,
                         6910.4,
-                        812.7));
+                        812.7,
+                        Map.of()));
 
         RoundTripRouteResponse response = service.generateRoundTrip(new RoundTripRouteRequest(
                 "cycling-mountain",
@@ -51,7 +53,8 @@ class RoundTripRoutingServiceTest {
                 new RoundTripRouteRequest.Start(41.637, 2.361),
                 new RoundTripRouteRequest.Preferences(
                         List.of("ferries"),
-                        new RoundTripRouteRequest.Weightings(0.8, 0.7),
+                        List.of("surface", "waytype"),
+                        new RoundTripRouteRequest.Weightings(0.8, 0.7, 2.0),
                         "trails",
                         1.0)));
 
@@ -79,14 +82,15 @@ class RoundTripRoutingServiceTest {
 
     @Test
     void shouldIncludeOnlyRequestedAvoidFeatures() {
-        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap()))
+        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap(), anyList()))
                 .thenReturn(new OpenRouteServiceDirectionsClient.DirectionsResult(
                         List.of(
                                 List.of(2.361000, 41.637000),
                                 List.of(2.362100, 41.638200)),
                         34780.2,
                         6910.4,
-                        812.7));
+                        812.7,
+                        Map.of()));
 
         RoundTripRouteResponse response = service.generateRoundTrip(new RoundTripRouteRequest(
                 "cycling-road",
@@ -95,6 +99,7 @@ class RoundTripRoutingServiceTest {
                 new RoundTripRouteRequest.Start(41.637, 2.361),
                 new RoundTripRouteRequest.Preferences(
                         List.of("ferries"),
+                        null,
                         null,
                         "balanced",
                         1.0)));
@@ -107,7 +112,7 @@ class RoundTripRoutingServiceTest {
 
     @Test
     void shouldFallbackAfterUpstreamError() {
-        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap()))
+        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap(), anyList()))
                 .thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.BAD_GATEWAY, "boom"))
                 .thenReturn(new OpenRouteServiceDirectionsClient.DirectionsResult(
                         List.of(
@@ -115,7 +120,8 @@ class RoundTripRoutingServiceTest {
                                 List.of(2.362100, 41.638200)),
                         1000.0,
                         100.0,
-                        10.0));
+                        10.0,
+                        Map.of()));
 
         RoundTripRouteResponse response = service.generateRoundTrip(new RoundTripRouteRequest(
                 "cycling-mountain",
@@ -128,17 +134,17 @@ class RoundTripRoutingServiceTest {
         assertNotNull(response.warnings());
     }
 
-
     @Test
     void shouldSupportAvoidAsphaltModeAlias() {
-        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap()))
+        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap(), anyList()))
                 .thenReturn(new OpenRouteServiceDirectionsClient.DirectionsResult(
                         List.of(
                                 List.of(2.361000, 41.637000),
                                 List.of(2.362100, 41.638200)),
                         18000.0,
                         3600.0,
-                        250.0));
+                        250.0,
+                        Map.of()));
 
         RoundTripRouteResponse response = service.generateRoundTrip(new RoundTripRouteRequest(
                 "cycling-mountain",
@@ -148,6 +154,7 @@ class RoundTripRoutingServiceTest {
                 new RoundTripRouteRequest.Preferences(
                         List.of("ferries"),
                         null,
+                        new RoundTripRouteRequest.Weightings(null, null, 5.0),
                         "avoid-asphalt",
                         1.0)));
 
@@ -159,6 +166,7 @@ class RoundTripRoutingServiceTest {
 
         assertEquals(0.9, ((Number) weightings.get("green")).doubleValue());
         assertEquals(0.7, ((Number) weightings.get("quiet")).doubleValue());
+        assertEquals(5, ((Number) weightings.get("steepness_difficulty")).intValue());
     }
 
     @Test
@@ -171,6 +179,7 @@ class RoundTripRoutingServiceTest {
                         new RoundTripRouteRequest.Start(41.637, 2.361),
                         new RoundTripRouteRequest.Preferences(
                                 List.of("unpaved"),
+                                null,
                                 null,
                                 "balanced",
                                 1.0))));

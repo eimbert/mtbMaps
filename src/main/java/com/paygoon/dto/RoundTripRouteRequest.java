@@ -30,6 +30,7 @@ public record RoundTripRouteRequest(
 
     public record Preferences(
             @Size(max = 8) List<@Pattern(regexp = "^(ferries|steps|tollways)$") String> avoidFeatures,
+            @Size(max = 8) List<@Pattern(regexp = "^(surface|waytype)$") String> extraInfo,
             @Valid Weightings weightings,
             @Pattern(regexp = "^(balanced|trails|anti-asphalt|avoid-asphalt)$") String mode,
             @DecimalMin("0.0") @DecimalMax("1.0") Double strictness) {
@@ -37,6 +38,7 @@ public record RoundTripRouteRequest(
 
     public record Weightings(
             @DecimalMin("0.0") @DecimalMax("2.0") Double green,
-            @DecimalMin("0.0") @DecimalMax("2.0") Double quiet) {
+            @DecimalMin("0.0") @DecimalMax("2.0") Double quiet,
+            @DecimalMin("0.0") @DecimalMax("6.0") Double steepness_difficulty) {
     }
 }
