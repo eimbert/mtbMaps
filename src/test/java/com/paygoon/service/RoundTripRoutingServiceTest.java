@@ -1,6 +1,7 @@
 package com.paygoon.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -75,6 +76,35 @@ class RoundTripRoutingServiceTest {
 
         assertEquals("INVALID_PROFILE", ex.getErrorCode());
         assertEquals(400, ex.getStatus().value());
+    }
+
+    @Test
+    void shouldAlwaysIncludeHighwaysInAvoidFeatures() {
+        when(directionsClient.fetchRoundTrip(anyString(), anyList(), anyMap()))
+                .thenReturn(new OpenRouteServiceDirectionsClient.DirectionsResult(
+                        List.of(
+                                List.of(2.361000, 41.637000),
+                                List.of(2.362100, 41.638200)),
+                        34780.2,
+                        6910.4,
+                        812.7));
+
+        RoundTripRouteResponse response = service.generateRoundTrip(new RoundTripRouteRequest(
+                "cycling-road",
+                "medium",
+                35.0,
+                new RoundTripRouteRequest.Start(41.637, 2.361),
+                new RoundTripRouteRequest.Preferences(
+                        List.of("ferries"),
+                        null,
+                        "balanced",
+                        1.0)));
+
+        @SuppressWarnings("unchecked")
+        List<String> avoidFeatures = (List<String>) response.appliedOptions().get("avoid_features");
+
+        assertTrue(avoidFeatures.contains("highways"));
+        assertTrue(avoidFeatures.contains("ferries"));
     }
 
     @Test
