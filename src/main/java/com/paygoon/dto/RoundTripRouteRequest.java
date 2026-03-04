@@ -3,8 +3,11 @@ package com.paygoon.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 public record RoundTripRouteRequest(
         @NotNull
@@ -17,10 +20,23 @@ public record RoundTripRouteRequest(
         @DecimalMin("5.0")
         @DecimalMax("200.0")
         Double lengthKm,
-        @NotNull @Valid Start start) {
+        @NotNull @Valid Start start,
+        @Valid Preferences preferences) {
 
     public record Start(
             @NotNull @DecimalMin("-90.0") @DecimalMax("90.0") Double lat,
             @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") Double lon) {
+    }
+
+    public record Preferences(
+            @Size(max = 8) List<@Pattern(regexp = "^(highways|ferries|steps|tollways)$") String> avoidFeatures,
+            @Valid Weightings weightings,
+            @Pattern(regexp = "^(balanced|trails|anti-asphalt)$") String mode,
+            @DecimalMin("0.0") @DecimalMax("1.0") Double strictness) {
+    }
+
+    public record Weightings(
+            @DecimalMin("0.0") @DecimalMax("1.0") Double green,
+            @DecimalMin("0.0") @DecimalMax("1.0") Double quiet) {
     }
 }
