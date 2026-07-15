@@ -47,6 +47,9 @@ public class RouteAnalysis {
     @Column(name = "file_name", length = 255)
     private String fileName;
 
+    @Column(name = "route_title", length = 255)
+    private String routeTitle;
+
     @Column(name = "gpx_hash", length = 64, nullable = false)
     private String gpxHash;
 

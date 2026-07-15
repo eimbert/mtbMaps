@@ -16,6 +16,7 @@ public record TrackResponse(
         Integer tiempoReal,
         LocalTime duracionRecorrido,
         BigDecimal distanceKm,
+        Long ascent,
         BigDecimal difficultyScore,
         Short difficultyLevel,
         String fileName,

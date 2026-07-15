@@ -63,6 +63,12 @@ public class Track {
     @Column(name = "distance_km", precision = 6, scale = 2)
     private BigDecimal distanceKm;
 
+    @Column(name = "desnivel")
+    private Long desnivel;
+
+    @Column(name = "desnivel_version")
+    private Short desnivelVersion;
+
     @Column(name = "difficulty_score", precision = 5, scale = 2)
     private BigDecimal difficultyScore;
 

@@ -19,6 +19,7 @@ public record TrackUploadRequest(
         @PositiveOrZero Integer tiempoReal,
         LocalTime duracionRecorrido,
         @DecimalMin(value = "0.0", inclusive = true) BigDecimal distanceKm,
+        @PositiveOrZero Long ascent,
         @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "100.0", inclusive = true) BigDecimal difficultyScore,
         @Min(0) @Max(4) Short difficultyLevel,
         BigDecimal startLat,

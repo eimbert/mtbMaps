@@ -1,13 +1,20 @@
 package com.paygoon.service;
 
+import java.io.StringReader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import com.paygoon.dto.TrackRouteSummaryResponse;
 import com.paygoon.dto.TrackUploadRequest;
@@ -27,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TrackService {
 
+    private static final short ASCENT_ALGORITHM_VERSION = 2;
+
 //    private final AuthenticationController authenticationController;
 
     private final TrackRepository trackRepository;
@@ -37,12 +46,14 @@ public class TrackService {
 //		
 //    }
 
+    @Transactional
     public List<TrackResponse> getAllTracks() {
         return trackRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<TrackResponse> getTracksByCreator(Long creatorId) {
         return trackRepository.findByCreatedById(creatorId).stream()
                 .map(this::mapToResponse)
@@ -53,6 +64,7 @@ public class TrackService {
         return trackRepository.findRouteSummariesByRouteId(routeId);
     }
 
+    @Transactional
     public List<TrackResponse> getSharedTracksExcludingUser(Long userId) {
         return trackRepository.findBySharedTrueAndCreatedByIdNot(userId).stream()
                 .map(this::mapToResponse)
@@ -81,6 +93,9 @@ public class TrackService {
         track.setTiempoReal(request.tiempoReal());
         track.setDuracionRecorrido(request.duracionRecorrido());
         track.setDistanceKm(request.distanceKm());
+        Long conservativeAscent = calculateAscent(request.routeXml());
+        track.setDesnivel(conservativeAscent != null ? conservativeAscent : request.ascent());
+        track.setDesnivelVersion(ASCENT_ALGORITHM_VERSION);
         track.setDifficultyScore(request.difficultyScore());
         track.setDifficultyLevel(request.difficultyLevel());
         track.setStartLat(request.startLat());
@@ -118,6 +133,7 @@ public class TrackService {
     }
 
     private TrackResponse mapToResponse(Track track) {
+        ensureStoredAscent(track);
         return new TrackResponse(
                 track.getId(),
                 track.getRoute() != null ? track.getRoute().getId() : null,
@@ -128,6 +144,7 @@ public class TrackService {
                 track.getTiempoReal(),
                 track.getDuracionRecorrido(),
                 track.getDistanceKm(),
+                track.getDesnivel(),
                 track.getDifficultyScore(),
                 track.getDifficultyLevel(),
                 track.getFileName(),
@@ -144,6 +161,73 @@ public class TrackService {
                 track.getStartLat(),
                 track.getStartLon()
         );
+    }
+
+    private void ensureStoredAscent(Track track) {
+        if (Short.valueOf(ASCENT_ALGORITHM_VERSION).equals(track.getDesnivelVersion())
+                || track.getRouteXml() == null || track.getRouteXml().isBlank()) {
+            return;
+        }
+        Long calculated = calculateAscent(track.getRouteXml());
+        if (calculated != null) {
+            track.setDesnivel(calculated);
+            track.setDesnivelVersion(ASCENT_ALGORITHM_VERSION);
+        }
+    }
+
+    private Long calculateAscent(String routeXml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            NodeList points = factory.newDocumentBuilder()
+                    .parse(new InputSource(new StringReader(routeXml)))
+                    .getElementsByTagNameNS("*", "trkpt");
+            List<Double> elevations = new ArrayList<>();
+            Double previousRaw = null;
+            for (int index = 0; index < points.getLength(); index++) {
+                Element point = (Element) points.item(index);
+                NodeList elevationNodes = point.getElementsByTagNameNS("*", "ele");
+                if (elevationNodes.getLength() == 0) continue;
+                double current = Double.parseDouble(elevationNodes.item(0).getTextContent().trim());
+                if (previousRaw == null || Math.abs(current - previousRaw) < 100) {
+                    elevations.add(current);
+                }
+                previousRaw = current;
+            }
+            if (elevations.isEmpty()) return null;
+
+            double[] smoothed = new double[elevations.size()];
+            for (int index = 0; index < elevations.size(); index++) {
+                int from = Math.max(0, index - 4);
+                int to = Math.min(elevations.size() - 1, index + 4);
+                double sum = 0;
+                for (int sample = from; sample <= to; sample++) sum += elevations.get(sample);
+                smoothed[index] = sum / (to - from + 1);
+            }
+
+            double gain = 0;
+            double valley = smoothed[0];
+            double peak = smoothed[0];
+            boolean climbing = false;
+            for (double elevation : smoothed) {
+                if (!climbing && elevation < valley) {
+                    valley = elevation;
+                    peak = elevation;
+                }
+                if (elevation > peak) peak = elevation;
+                if (peak - valley >= 5) climbing = true;
+                if (climbing && peak - elevation >= 5) {
+                    gain += peak - valley;
+                    valley = elevation;
+                    peak = elevation;
+                    climbing = false;
+                }
+            }
+            if (peak - valley >= 5) gain += peak - valley;
+            return Math.round(gain);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private String resolveNickname(AppUser creator) {

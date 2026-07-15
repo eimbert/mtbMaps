@@ -44,6 +44,7 @@ import com.paygoon.dto.RouteAnalysisResponse.RouteAnalysisSector;
 import com.paygoon.model.AppUser;
 import com.paygoon.model.RouteAnalysis;
 import com.paygoon.repository.RouteAnalysisRepository;
+import com.paygoon.repository.TrackRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,7 @@ public class RouteAnalysisService {
     private static final int MAX_PROMPT_POINTS = 140;
 
     private final RouteAnalysisRepository routeAnalysisRepository;
+    private final TrackRepository trackRepository;
     private final ObjectMapper objectMapper;
     private final Map<String, Double> elevationCache = new ConcurrentHashMap<>();
 
@@ -106,6 +108,7 @@ public class RouteAnalysisService {
         analysis.setSource(source);
         analysis.setSourceTrackId(request.trackId());
         analysis.setFileName(request.fileName());
+        analysis.setRouteTitle(normalizeRouteTitle(request.title()));
         analysis.setGpxHash(gpxHash);
         analysis.setAnalysisVersion(isAiReport(generatedReport) ? ANALYSIS_VERSION : ANALYSIS_VERSION + "-fallback");
         analysis.setUserInstructions(userInstructions);
@@ -161,6 +164,7 @@ public class RouteAnalysisService {
                             existing.getSourceTrackId(),
                             existing.getSource(),
                             existing.getFileName(),
+                            existing.getRouteTitle(),
                             existing.getRouteXml(),
                             existing.getUserInstructions(),
                             true
@@ -308,7 +312,7 @@ public class RouteAnalysisService {
 
         double minEle = points.stream().mapToDouble(RoutePoint::ele).min().orElse(0);
         double maxEle = points.stream().mapToDouble(RoutePoint::ele).max().orElse(0);
-        ElevationTotals elevationTotals = calculateElevationTotals(points, 20.0, 40.0, 0.25, 50.0);
+        ElevationTotals elevationTotals = calculateElevationTotals(points, 25.0, 100.0, 1.5, 40.0);
         double gain = elevationTotals.gain();
         double loss = elevationTotals.loss();
         if (gain < 1 && Double.isFinite(maxEle - minEle) && maxEle - minEle > 8) {
@@ -710,7 +714,8 @@ public class RouteAnalysisService {
     private PublicRouteAnalysisResponse mapToPublicResponse(RouteAnalysis analysis) {
         return new PublicRouteAnalysisResponse(
                 analysis.getId(),
-                publicTitle(analysis.getFileName()),
+                publicTitle(analysis),
+                analysis.getFileName(),
                 analysis.getSource(),
                 calculateElevation(analysis.getRouteXml()),
                 analysis.getCreatedAt(),
@@ -719,12 +724,35 @@ public class RouteAnalysisService {
         );
     }
 
-    private String publicTitle(String fileName) {
+    private String publicTitle(RouteAnalysis analysis) {
+        String routeTitle = analysis.getRouteTitle();
+        if (routeTitle != null && !routeTitle.isBlank()) {
+            return routeTitle.trim();
+        }
+        if (analysis.getSourceTrackId() != null) {
+            String population = trackRepository.findById(analysis.getSourceTrackId())
+                    .map(track -> track.getPopulation())
+                    .orElse(null);
+            if (population != null && !population.isBlank()) {
+                return population.trim();
+            }
+        }
+        String fileName = analysis.getFileName();
         if (fileName == null || fileName.isBlank()) {
             return "Ruta analizada";
         }
         String title = fileName.replaceFirst("(?i)\\.gpx$", "").trim();
+        if (title.toLowerCase().startsWith("activity_")) {
+            return "Ruta analizada";
+        }
         return title.isBlank() ? "Ruta analizada" : title;
+    }
+
+    private String normalizeRouteTitle(String value) {
+        if (value == null || value.isBlank() || value.trim().toLowerCase().startsWith("activity_")) {
+            return "Ruta analizada";
+        }
+        return value.trim();
     }
 
     public RouteAnalysisResponse.RouteAnalysisStats calculateElevation(String routeXml) {
