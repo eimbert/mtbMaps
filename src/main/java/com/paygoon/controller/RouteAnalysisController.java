@@ -69,6 +69,18 @@ public class RouteAnalysisController {
         return ResponseEntity.ok(routeAnalysisService.analyze(request, user));
     }
 
+    @PostMapping("/lookup")
+    public ResponseEntity<RouteAnalysisResponse> lookupExisting(
+            @Valid @RequestBody RouteAnalysisRequest request,
+            Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return routeAnalysisService.findExisting(request.routeXml())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/track/{trackId}")
     public ResponseEntity<RouteAnalysisResponse> getTrackAnalysis(
             @PathVariable Long trackId,

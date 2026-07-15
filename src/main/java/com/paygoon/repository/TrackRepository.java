@@ -18,5 +18,7 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
 
     List<Track> findByCreatedById(Long createdById);
 
+    long countByCreatedById(Long createdById);
+
     List<Track> findBySharedTrueAndCreatedByIdNot(Long createdById);
 }

@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -40,6 +42,7 @@ public class TrackService {
 
     private final TrackRepository trackRepository;
     private final RouteRepository routeRepository;
+    private final EntitlementService entitlementService;
 
 //    TrackService(AuthenticationController authenticationController) {
 //        this.authenticationController = authenticationController;
@@ -65,14 +68,16 @@ public class TrackService {
     }
 
     @Transactional
-    public List<TrackResponse> getSharedTracksExcludingUser(Long userId) {
-        return trackRepository.findBySharedTrueAndCreatedByIdNot(userId).stream()
+    public List<TrackResponse> getSharedTracksExcludingUser(AppUser user) {
+        var stream = trackRepository.findBySharedTrueAndCreatedByIdNot(user.getId()).stream();
+        return stream
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public Track createTrack(TrackUploadRequest request, AppUser creator) {
+        entitlementService.assertCanUploadTrack(creator);
 //        Route route = routeRepository.findById(request.routeId())
 //                .orElseThrow(() -> new EntityNotFoundException("Route not found"));
 
@@ -116,9 +121,17 @@ public class TrackService {
         return trackRepository.save(track);
     }
 
-    public TrackGpxResponse getTrackGpx(Long trackId) {
+    @Transactional
+    public TrackGpxResponse getTrackGpx(Long trackId, AppUser requester) {
         Track track = trackRepository.findById(trackId)
                 .orElseThrow(() -> new EntityNotFoundException("Track not found"));
+
+        if (track.getCreatedBy() != null && !track.getCreatedBy().getId().equals(requester.getId())) {
+            if (!track.isShared()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Este track es privado");
+            }
+            entitlementService.registerThirdPartyTrackAccess(requester, trackId);
+        }
 
         return new TrackGpxResponse(track.getId(), track.getFileName(), track.getRouteXml());
     }

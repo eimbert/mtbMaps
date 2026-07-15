@@ -60,6 +60,7 @@ public class RouteAnalysisService {
     private final RouteAnalysisRepository routeAnalysisRepository;
     private final TrackRepository trackRepository;
     private final ObjectMapper objectMapper;
+    private final EntitlementService entitlementService;
     private final Map<String, Double> elevationCache = new ConcurrentHashMap<>();
 
     @Value("${route-analysis.openai.enabled:true}")
@@ -100,8 +101,13 @@ public class RouteAnalysisService {
             }
         }
 
+        entitlementService.assertCanUseRouteAnalysis(user);
+
         RouteStats stats = parseStats(routeXml);
         GeneratedReport generatedReport = generateReport(stats, userInstructions);
+        if (isAiReport(generatedReport)) {
+            entitlementService.recordRouteAnalysis(user);
+        }
 
         RouteAnalysis analysis = routeAnalysisRepository.findFirstByGpxHashOrderByUpdatedAtDesc(gpxHash).orElseGet(RouteAnalysis::new);
         analysis.setUserId(user.getId());
@@ -121,7 +127,7 @@ public class RouteAnalysisService {
 
         RouteAnalysis saved = routeAnalysisRepository.save(analysis);
         removeDuplicateAnalyses(gpxHash, saved.getId());
-        return mapToResponse(saved);
+        return mapToResponse(saved, isAiReport(generatedReport), false);
     }
 
     @Transactional(readOnly = true)
@@ -176,6 +182,13 @@ public class RouteAnalysisService {
     private Optional<RouteAnalysis> findCachedAnalysis(String gpxHash, String instructionsHash) {
         return routeAnalysisRepository.findFirstByGpxHashOrderByUpdatedAtDesc(gpxHash)
                 .filter(analysis -> instructionsHash.equals(nullToEmptyHash(analysis.getInstructionsHash())) && isReusableAnalysis(analysis));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<RouteAnalysisResponse> findExisting(String routeXml) {
+        return routeAnalysisRepository.findFirstByGpxHashOrderByUpdatedAtDesc(sha256(routeXml))
+                .filter(this::isReusableAnalysis)
+                .map(this::mapToResponse);
     }
 
     private void removeDuplicateAnalyses(String gpxHash, Long keepId) {
@@ -692,6 +705,10 @@ public class RouteAnalysisService {
         return normalized.length() > 580 ? normalized.substring(0, 580) : normalized;
     }
     private RouteAnalysisResponse mapToResponse(RouteAnalysis analysis) {
+        return mapToResponse(analysis, false, true);
+    }
+
+    private RouteAnalysisResponse mapToResponse(RouteAnalysis analysis, boolean usageCharged, boolean reusedExisting) {
         return new RouteAnalysisResponse(
                 analysis.getId(),
                 analysis.getSourceTrackId(),
@@ -707,7 +724,9 @@ public class RouteAnalysisService {
                 calculateElevation(analysis.getRouteXml()),
                 analysis.getCreatedAt(),
                 analysis.getUpdatedAt(),
-                readReport(analysis.getReportJson())
+                readReport(analysis.getReportJson()),
+                usageCharged,
+                reusedExisting
         );
     }
 

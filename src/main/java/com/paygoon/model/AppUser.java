@@ -55,6 +55,15 @@ public class AppUser {
 
     private boolean premium = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AccountPlan accountPlan = AccountPlan.FREE;
+
+    private LocalDateTime premiumUntil;
+
+    @Column(nullable = false)
+    private boolean lifetimePremium = false;
+
     private String documentType;
 
     private String documentNumber;
@@ -63,10 +72,17 @@ public class AppUser {
         EMAIL, GOOGLE, APPLE
     }
 
+    public enum AccountPlan {
+        FREE, PREMIUM, ADMIN
+    }
+
     @PrePersist
     public void onCreate() {
         if (verificationRequestedAt == null) {
             verificationRequestedAt = LocalDateTime.now();
+        }
+        if (accountPlan == null) {
+            accountPlan = premium ? AccountPlan.PREMIUM : AccountPlan.FREE;
         }
     }
 }

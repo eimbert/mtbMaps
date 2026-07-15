@@ -36,6 +36,7 @@ import com.paygoon.repository.UserRepository;
 import com.paygoon.security.JwtUtil;
 import com.paygoon.service.EmailVerificationService;
 import com.paygoon.service.PasswordResetService;
+import com.paygoon.service.EntitlementService;
 
 @RestController
 @RequestMapping("/auth")
@@ -47,6 +48,7 @@ public class AuthenticationController {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private EmailVerificationService emailVerificationService;
     @Autowired private PasswordResetService passwordResetService;
+    @Autowired private EntitlementService entitlementService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -61,6 +63,7 @@ public class AuthenticationController {
 
                 String token = jwtUtil.generateToken(user);
 
+                var entitlements = entitlementService.describe(user);
                 LoginResponse response = new LoginResponse(
                     0,
                     token,
@@ -69,7 +72,10 @@ public class AuthenticationController {
                     user.getEmail(),
                     user.getNickname(),
                     user.getRol(),
-                    user.isPremium(),
+                    entitlements.premium(),
+                    entitlements.plan(),
+                    entitlements.administrator(),
+                    entitlements.lifetimePremium(),
                     user.isVerified()
                 );
                 return ResponseEntity.ok(response);
@@ -111,7 +117,7 @@ public class AuthenticationController {
         user.setName(request.name());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setNickname(request.nickname());
-        user.setRol(request.rol());
+        user.setRol("USER");
         user.setVerified(false);   // puedes activarlo después con verificación por correo
         user.setPremium(false);
         user.setLoginType(LoginType.EMAIL);
@@ -147,7 +153,7 @@ public class AuthenticationController {
         user.setName(request.name());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setNickname(request.nickname());
-        user.setRol(request.rol());
+        user.setRol("USER");
         user.setVerified(false);
         user.setPremium(false);
         user.setLoginType(LoginType.EMAIL);
@@ -201,11 +207,16 @@ public class AuthenticationController {
         AppUser user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
+        var entitlements = entitlementService.describe(user);
         UserProfileResponse response = new UserProfileResponse(
             user.getId(),
             user.getName(),
             user.getNickname(),
-            user.getRol()
+            user.getRol(),
+            entitlements.premium(),
+            entitlements.plan(),
+            entitlements.administrator(),
+            entitlements.lifetimePremium()
         );
 
         return ResponseEntity.ok(response);

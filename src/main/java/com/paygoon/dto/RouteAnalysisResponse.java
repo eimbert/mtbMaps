@@ -18,7 +18,9 @@ public record RouteAnalysisResponse(
         RouteAnalysisStats routeStats,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        RouteAnalysisReport report
+        RouteAnalysisReport report,
+        boolean usageCharged,
+        boolean reusedExisting
 ) {
     public record RouteAnalysisStats(
             double distanceKm,

@@ -9,5 +9,8 @@ public record LoginResponse(
     String nickname,
     String rol,
     boolean premium,
+    String plan,
+    boolean administrator,
+    boolean lifetimePremium,
     boolean verified
 ) {}

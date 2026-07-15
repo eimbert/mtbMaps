@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.paygoon.dto.TrackGpxResponse;
 import com.paygoon.dto.TrackResponse;
@@ -66,7 +67,7 @@ public class TrackController {
         AppUser requester = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        List<TrackResponse> tracks = trackService.getSharedTracksExcludingUser(requester.getId());
+        List<TrackResponse> tracks = trackService.getSharedTracksExcludingUser(requester);
         return ResponseEntity.ok(tracks);
     }
 
@@ -77,9 +78,14 @@ public class TrackController {
     }
 
     @GetMapping("/{id}/gpx")
-    public ResponseEntity<TrackGpxResponse> getTrackGpx(@PathVariable Long id) {
+    public ResponseEntity<TrackGpxResponse> getTrackGpx(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        AppUser requester = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
         try {
-            TrackGpxResponse response = trackService.getTrackGpx(id);
+            TrackGpxResponse response = trackService.getTrackGpx(id, requester);
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -110,6 +116,9 @@ public class TrackController {
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new TrackUploadResponse(null, "Ruta no encontrada", -2));
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode())
+                    .body(new TrackUploadResponse(null, ex.getReason(), -3));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new TrackUploadResponse(null, "No se pudo subir el track", -99));

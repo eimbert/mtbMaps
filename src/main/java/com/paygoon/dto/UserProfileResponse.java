@@ -4,5 +4,9 @@ public record UserProfileResponse(
     Long userId,
     String nom,
     String nickname,
-    String rol
+    String rol,
+    boolean premium,
+    String plan,
+    boolean administrator,
+    boolean lifetimePremium
 ) {}
