@@ -3,6 +3,7 @@ package com.paygoon.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -67,6 +68,80 @@ class PlanFolderControllerTest {
 
     @InjectMocks
     private PlanFolderController controller;
+
+    @Test
+    void resendPendingInvitationDeliversEmailAndInboxReminder() {
+        AppUser owner = new AppUser();
+        owner.setId(7L);
+        owner.setEmail("owner@example.com");
+        AppUser guest = new AppUser();
+        guest.setId(17L);
+        PlanFolder folder = new PlanFolder();
+        folder.setId(13L);
+        folder.setOwner(owner);
+        folder.setName("El Sui");
+        PlanFolderMember invitation = new PlanFolderMember();
+        invitation.setId(99L);
+        invitation.setFolder(folder);
+        invitation.setUser(guest);
+        invitation.setStatus(PlanFolderMember.Status.pending);
+
+        when(authentication.getName()).thenReturn("owner@example.com");
+        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(owner));
+        when(planFolderRepository.findById(13L)).thenReturn(Optional.of(folder));
+        when(planFolderMemberRepository.findById(99L)).thenReturn(Optional.of(invitation));
+
+        ResponseEntity<Void> response = controller.resendPlanFolderInvitation(13L, 99L, authentication);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        verify(notificationService).sendPlanFolderInvitationEmail(guest, owner, folder);
+        verify(mensajeRepository).save(org.mockito.ArgumentMatchers.argThat(message ->
+                message.getIdInvitacion().equals(99L) && message.getUser().equals(guest)));
+        assertThat(invitation.getStatus()).isEqualTo(PlanFolderMember.Status.pending);
+    }
+
+    @Test
+    void resendAcceptedInvitationIsRejectedWithoutDelivery() {
+        AppUser owner = new AppUser();
+        owner.setId(7L);
+        owner.setEmail("owner@example.com");
+        PlanFolder folder = new PlanFolder();
+        folder.setId(13L);
+        folder.setOwner(owner);
+        PlanFolderMember invitation = new PlanFolderMember();
+        invitation.setId(99L);
+        invitation.setFolder(folder);
+        invitation.setStatus(PlanFolderMember.Status.accepted);
+
+        when(authentication.getName()).thenReturn("owner@example.com");
+        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(owner));
+        when(planFolderRepository.findById(13L)).thenReturn(Optional.of(folder));
+        when(planFolderMemberRepository.findById(99L)).thenReturn(Optional.of(invitation));
+
+        assertThat(controller.resendPlanFolderInvitation(13L, 99L, authentication).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+        verify(notificationService, never()).sendPlanFolderInvitationEmail(any(), any(), any());
+        verify(mensajeRepository, never()).save(any());
+    }
+
+    @Test
+    void onlyOwnerCanResendInvitation() {
+        AppUser owner = new AppUser();
+        owner.setId(7L);
+        AppUser other = new AppUser();
+        other.setId(8L);
+        PlanFolder folder = new PlanFolder();
+        folder.setId(13L);
+        folder.setOwner(owner);
+
+        when(authentication.getName()).thenReturn("other@example.com");
+        when(userRepository.findByEmail("other@example.com")).thenReturn(Optional.of(other));
+        when(planFolderRepository.findById(13L)).thenReturn(Optional.of(folder));
+
+        assertThat(controller.resendPlanFolderInvitation(13L, 99L, authentication).getStatusCode())
+                .isEqualTo(HttpStatus.FORBIDDEN);
+        verify(notificationService, never()).sendPlanFolderInvitationEmail(any(), any(), any());
+    }
 
     @Test
     void deletePlanFolderRemovesTracksAndInvitations() {

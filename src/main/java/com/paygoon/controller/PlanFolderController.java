@@ -335,6 +335,56 @@ public class PlanFolderController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{folderId}/invitations/{invitationId}/resend")
+    public ResponseEntity<Void> resendPlanFolderInvitation(
+            @PathVariable Long folderId,
+            @PathVariable Long invitationId,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        PlanFolder folder = planFolderRepository.findById(folderId).orElse(null);
+        if (folder == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        AppUser requester = userRepository.findByEmail(authentication.getName()).orElse(null);
+        if (requester == null || folder.getOwner() == null
+                || !requester.getId().equals(folder.getOwner().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        PlanFolderMember invitation = planFolderMemberRepository.findById(invitationId).orElse(null);
+        if (invitation == null || invitation.getFolder() == null
+                || !folderId.equals(invitation.getFolder().getId())) {
+            return ResponseEntity.notFound().build();
+        }
+        if (invitation.getStatus() != PlanFolderMember.Status.pending
+                && invitation.getStatus() != PlanFolderMember.Status.sending) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        AppUser invitedUser = invitation.getUser();
+        if (invitedUser == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        notificationService.sendPlanFolderInvitationEmail(invitedUser, requester, folder);
+
+        Mensaje reminder = new Mensaje();
+        reminder.setUser(invitedUser);
+        reminder.setUserMsg(requester);
+        reminder.setMensaje("Te han recordado la invitación a la carpeta '" + folder.getName() + "'.");
+        reminder.setTipoMsg(1);
+        reminder.setEstado(null);
+        reminder.setIdInvitacion(invitation.getId());
+        mensajeRepository.save(reminder);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{folderId}")
     public ResponseEntity<PlanFolderCreateResponse> updatePlanFolder(
             @Valid @RequestBody PlanFolderUpdateRequest request,
